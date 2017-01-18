@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/spf13/viper"
+	"github.com/aldenso/zfssareport/zfssareportfs"
 )
 
 var (
@@ -20,23 +22,31 @@ var (
 	POOLS Pools
 	//POOLSPROJECTS map for projects in pools.
 	POOLSPROJECTS = make(map[string][]string)
+
+	// Fs afero fs to help later with testing.
+	Fs = zfssareportfs.InitOSFs()
+
+	template   bool
+	configfile string
 )
 
 func init() {
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	IP = viper.GetString("ip")
-	USER = viper.GetString("user")
-	PASSWORD = viper.GetString("password")
-	URL = fmt.Sprintf("https://%s:215/api", IP)
+	flag.BoolVar(&template, "template", false, "Create an example config.yml file.")
+	flag.StringVar(&configfile, "t", "config.yml", "Specify a config file.")
 }
 
 func main() {
+	flag.Parse()
+	if template {
+		msg, err := CreateTemplate(Fs)
+		if err != nil {
+			log.Fatalf("Error creating tomfile: %v", err)
+		} else {
+			fmt.Println(msg)
+			os.Exit(0)
+		}
+	}
+	ReadConfigFile()
 	PrintPools()
 	PrintProjects()
 	PrintFilesystems()

@@ -1,0 +1,54 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/spf13/afero"
+	"github.com/spf13/viper"
+)
+
+const (
+	configexists  = "config.yml already exist."
+	configcreated = "config.yml created."
+)
+
+// CreateTemplate fucntion to create a base remgo.toml file
+func CreateTemplate(fs afero.Fs) (string, error) {
+	template := `# ZFSSA REPORT CONFIG"
+ip: 192.168.56.150
+user: root
+password: password
+`
+	configfile := "config.yml"
+	if _, err := fs.Stat(configfile); err != nil {
+		if os.IsNotExist(err) {
+			file, err := fs.Create(configfile)
+			if err != nil {
+				return "", err
+			}
+			defer file.Close()
+			if _, err := file.Write([]byte(template)); err != nil {
+				return "", err
+			}
+		}
+	} else {
+		return configexists, nil
+	}
+	return configcreated, nil
+}
+
+//ReadConfigFile read yaml config file for zfssa.
+func ReadConfigFile() {
+	viper.SetConfigFile(configfile)
+	viper.SetConfigType("yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	IP = viper.GetString("ip")
+	USER = viper.GetString("user")
+	PASSWORD = viper.GetString("password")
+	URL = fmt.Sprintf("https://%s:215/api", IP)
+}
