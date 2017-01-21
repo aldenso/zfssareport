@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
+	"time"
 
 	"github.com/aldenso/zfssareport/zfssareportfs"
 )
@@ -26,8 +29,12 @@ var (
 	// Fs afero fs to help later with testing.
 	Fs = zfssareportfs.InitOSFs()
 
+	//NOW for timestamp
+	NOW = time.Now()
+
 	template   bool
 	configfile string
+	dirname    string
 )
 
 func init() {
@@ -47,9 +54,13 @@ func main() {
 		}
 	}
 	ReadConfigFile()
+	dirname = fmt.Sprintf("%s_%s", IP, strings.Replace(NOW.Format(time.RFC3339), ":", "", -1))
+	if err := CreateDir(Fs, dirname); err != nil {
+		log.Fatal(err)
+	}
 	PrintPools()
 	PrintProjects()
 	PrintFilesystems()
 	PrintLUNS()
-	fmt.Println("DONE!")
+	fmt.Printf("############# DONE in %s #############\n", time.Since(NOW).String())
 }

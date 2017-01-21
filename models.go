@@ -10,10 +10,10 @@ type Pool struct {
 	Status  string `json:"status"`
 	Profile string `json:"profile"`
 	Name    string `json:"name"`
-	Usage   *struct {
+	Usage   struct {
 		Available      float64 `json:"available"`
 		UsageSnapshots float64 `json:"usage_snapshots"`
-		Used           float64 `json:"user"`
+		Used           float64 `json:"used"`
 		Compression    int     `json:"compression"`
 		UsageData      float64 `json:"usage_data"`
 		Free           float64 `json:"free"`
@@ -79,7 +79,7 @@ type Project struct {
 	ShareTFTP          string  `json:"sharetftp,omitempty"`
 	SnapDir            string  `json:"snapdir"`
 	SnapLabel          string  `json:"snaplabel,omitempty"`
-	Source             *struct {
+	Source             struct {
 		ACLinherit     string `json:"aclinherit"`
 		ACLMode        string `json:"aclmode"`
 		ATime          string `json:"atime"`
@@ -243,7 +243,7 @@ type LUN struct {
 	Project        string   `json:"project"`
 	SecondaryCache string   `json:"secondarycache"`
 	SnapLabel      string   `json:"snaplabel,omitempty"`
-	Source         *struct {
+	Source         struct {
 		CheckSum       string `json:"checksum"`
 		Compression    string `json:"compression"`
 		Copies         string `json:"copies"`

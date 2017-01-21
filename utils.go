@@ -52,3 +52,29 @@ func ReadConfigFile() {
 	PASSWORD = viper.GetString("password")
 	URL = fmt.Sprintf("https://%s:215/api", IP)
 }
+
+//CreateDir create directory for collected info.
+func CreateDir(fs afero.Fs, name string) error {
+	err := fs.Mkdir(name, 0750)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//CreateFile create file for info dump.
+func CreateFile(fs afero.Fs, dirname string, filename string) (afero.File, error) {
+	file, err := fs.Create(dirname + "/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
+}
+
+//CloseFile close file when done.
+func CloseFile(file afero.File) error {
+	if err := file.Close(); err != nil {
+		return err
+	}
+	return nil
+}
