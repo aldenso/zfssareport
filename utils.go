@@ -10,17 +10,16 @@ import (
 )
 
 const (
-	configexists  = "config.yml already exist."
-	configcreated = "config.yml created."
+	configexists    = "config.yml already exist."
+	configcreated   = "config.yml created."
+	templatecontent = `# ZFSSA REPORT CONFIG"
+ip: 192.168.56.150
+user: root
+password: password`
 )
 
 // CreateTemplate fucntion to create a base remgo.toml file
 func CreateTemplate(fs afero.Fs) (string, error) {
-	template := `# ZFSSA REPORT CONFIG"
-ip: 192.168.56.150
-user: root
-password: password
-`
 	configfile := "config.yml"
 	if _, err := fs.Stat(configfile); err != nil {
 		if os.IsNotExist(err) {
@@ -29,7 +28,7 @@ password: password
 				return "", err
 			}
 			defer file.Close()
-			if _, err := file.Write([]byte(template)); err != nil {
+			if _, err := file.Write([]byte(templatecontent)); err != nil {
 				return "", err
 			}
 		}

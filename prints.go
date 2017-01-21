@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/spf13/afero"
 )
 
 //Header print header for output.
 func Header(msg string) {
-	fmt.Println("########################################################################################")
-	fmt.Printf("## %-82s ##\n", msg)
-	fmt.Println("########################################################################################")
+	fmt.Println("#####################################################################################################################")
+	fmt.Printf("## %-111s ##\n", msg)
+	fmt.Println("#####################################################################################################################")
 }
 
 //PrintPools prints some pools values and create file to dump all values.
-func PrintPools() {
-	POOLS = GetPools()
-	file, err := CreateFile(Fs, dirname, "pools.csv")
+func PrintPools(pools Pools, fs afero.Fs) {
+	//POOLS = GetPools()
+	file, err := CreateFile(fs, dirname, "pools.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,18 +31,18 @@ func PrintPools() {
 		log.Fatal(err)
 	}
 	Header("Pools information")
-	fmt.Printf("%6s %8s %-35s %10s %10s %10s %10s %10s %10s\n",
+	fmt.Printf("%-6s %-8s %-35s %10s %10s %10s %10s %10s %10s\n",
 		"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
-		"Free(GB)", "UsagData(GB)", "UsagSnaps(GB)", "UsagTotal(GB)")
-	for _, pool := range POOLS.List {
-		fmt.Printf("%6s %8s %-35s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n",
-			pool.Name, pool.Status, pool.Profile, pool.Usage.Total/(1024*1024*1024), pool.Usage.Available/(1024*1024*1024),
-			pool.Usage.Free/(1024*1024*1024), pool.Usage.UsageData/(1024*1024*1024), pool.Usage.UsageSnapshots/(1024*1024*1024),
-			pool.Usage.UsageTotal/(1024*1024*1024))
+		"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
+	for _, pool := range pools.List {
+		fmt.Printf("%-6s %-8s %-35s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n",
+			pool.Name, pool.Status, pool.Profile, pool.PoolUsage.Total/(1024*1024*1024), pool.PoolUsage.Available/(1024*1024*1024),
+			pool.PoolUsage.Free/(1024*1024*1024), pool.PoolUsage.UsageData/(1024*1024*1024), pool.PoolUsage.UsageSnapshots/(1024*1024*1024),
+			pool.PoolUsage.UsageTotal/(1024*1024*1024))
 
 		line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;%.2f;%d;%.2f;%.2f;%d;%.2f;%.2f;%s;%s;%s", pool.Name, pool.Status, pool.Profile,
-			pool.Usage.Available, pool.Usage.UsageSnapshots, pool.Usage.Used, pool.Usage.Compression, pool.Usage.UsageData,
-			pool.Usage.Free, pool.Usage.Dedupratio, pool.Usage.Total, pool.Usage.UsageTotal, pool.Peer, pool.Owner, pool.ASN)
+			pool.PoolUsage.Available, pool.PoolUsage.UsageSnapshots, pool.PoolUsage.Used, pool.PoolUsage.Compression, pool.PoolUsage.UsageData,
+			pool.PoolUsage.Free, pool.PoolUsage.Dedupratio, pool.PoolUsage.Total, pool.PoolUsage.UsageTotal, pool.Peer, pool.Owner, pool.ASN)
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -52,9 +54,19 @@ func PrintPools() {
 	}
 }
 
+//CreateMapPoolsProjects create a map for projects in pools.
+func CreateMapPoolsProjects(pools Pools) map[string]Projects {
+	poolsprojects := make(map[string]Projects)
+	for _, pool := range pools.List {
+		projects := GetProjects(pool.Name)
+		poolsprojects[pool.Name] = projects
+	}
+	return poolsprojects
+}
+
 //PrintProjects prints some projects values for all pools.
-func PrintProjects() {
-	file, err := CreateFile(Fs, dirname, "projects.csv")
+func PrintProjects(pmap map[string]Projects, fs afero.Fs) {
+	file, err := CreateFile(fs, dirname, "projects.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,12 +89,11 @@ func PrintProjects() {
 	}
 
 	Header("Projects information")
-	fmt.Printf("%-22s %10s %10s %8s %10s %-40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "SpaceTotal(GB)", "mountpoint")
-	for _, pool := range POOLS.List {
-		projects := GetProjects(pool.Name)
+	fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
+	for _, projects := range pmap {
+		//projects := GetProjects(pool.Name)
 		for _, project := range projects.List {
-			POOLSPROJECTS[pool.Name] = append(POOLSPROJECTS[pool.Name], project.Name)
-			fmt.Printf("%-22s %10.2f %10.2f %8s %10.2f %-40s\n", project.Name, project.Reservation/(1024*1024*1024),
+			fmt.Printf("%-15s %-10.2f %-10.2f %-8s %10.2f %40s\n", project.Name, project.Reservation/(1024*1024*1024),
 				project.Quota/(1024*1024*1024), project.Pool, project.SpaceTotal/(1024*1024*1024), project.MountPoint)
 
 			line := fmt.Sprintf("%s;%s;%.2f;%.2f;%.2f;"+
@@ -110,12 +121,12 @@ func PrintProjects() {
 				/*line7*/ project.Logbias, project.MaxBlockSize, project.Nbmand, project.Nodestroy, project.ReadOnly,
 				/*line8*/ project.RecordSize, project.Rstchown, project.SecondaryCache, project.ShareDAV, project.ShareFTP,
 				/*line9*/ project.ShareNFS, project.ShareSFTP, project.ShareSMB, project.ShareTFTP, project.SnapDir,
-				/*line10*/ project.SnapLabel, project.Source.ACLinherit, project.Source.ACLMode, project.Source.ATime, project.Source.CheckSum,
-				/*line11*/ project.Source.Compression, project.Source.Copies, project.Source.Dedup, project.Source.Exported, project.Source.KeyChangeDate,
-				/*line12*/ project.Source.Logbias, project.Source.MaxBlockSize, project.Source.MountPoint, project.Source.Nbmand, project.Source.ReadOnly,
-				/*line13*/ project.Source.RecordSize, project.Source.Reservation, project.Source.RRSRCActions, project.Source.Rstchown, project.Source.SecondaryCache,
-				/*line14*/ project.Source.ShareDAV, project.Source.ShareFTP, project.Source.ShareNFS, project.Source.ShareSFTP, project.Source.ShareSMB,
-				/*line15*/ project.Source.ShareTFTP, project.Source.SnapDir, project.Source.VScan, project.SpaceAvailable, project.SpaceData,
+				/*line10*/ project.SnapLabel, project.ProjectSource.ACLinherit, project.ProjectSource.ACLMode, project.ProjectSource.ATime, project.ProjectSource.CheckSum,
+				/*line11*/ project.ProjectSource.Compression, project.ProjectSource.Copies, project.ProjectSource.Dedup, project.ProjectSource.Exported, project.ProjectSource.KeyChangeDate,
+				/*line12*/ project.ProjectSource.Logbias, project.ProjectSource.MaxBlockSize, project.ProjectSource.MountPoint, project.ProjectSource.Nbmand, project.ProjectSource.ReadOnly,
+				/*line13*/ project.ProjectSource.RecordSize, project.ProjectSource.Reservation, project.ProjectSource.RRSRCActions, project.ProjectSource.Rstchown, project.ProjectSource.SecondaryCache,
+				/*line14*/ project.ProjectSource.ShareDAV, project.ProjectSource.ShareFTP, project.ProjectSource.ShareNFS, project.ProjectSource.ShareSFTP, project.ProjectSource.ShareSMB,
+				/*line15*/ project.ProjectSource.ShareTFTP, project.ProjectSource.SnapDir, project.ProjectSource.VScan, project.SpaceAvailable, project.SpaceData,
 				/*line16*/ project.SpaceSnapShots, project.SpaceUnusedRes, project.SpaceUnusedResShares, project.VScan)
 			record := strings.Split(line, ";")
 			if err := writer.Write(record); err != nil {
@@ -129,32 +140,41 @@ func PrintProjects() {
 	}
 }
 
+//CreateFSSlice create a map for filesystems
+func CreateFSSlice(pmap map[string]Projects) []Filesystems {
+	var poolsprojectsfs []Filesystems
+	for pool, projects := range pmap {
+		for _, project := range projects.List {
+			filesystems := GetFilesystems(pool, project.Name)
+			poolsprojectsfs = append(poolsprojectsfs, filesystems)
+		}
+	}
+	return poolsprojectsfs
+}
+
 //PrintFilesystems prints some filesystems values for all projects in all pools.
-func PrintFilesystems() {
+func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 	Header("Filesystems information")
-	fmt.Printf("%-18s %8s %-22s %8s %8s %8s %8s %8s %6s %-35s\n",
-		"Filesystem", "Pool", "Project", "Reserv(GB)", "Quota(GB)", "STotal(GB)", "user", "group", "perms", "mountpoint")
-	for pool, projects := range POOLSPROJECTS {
-		for _, project := range projects {
-			filesystems := GetFilesystems(pool, project)
-			for _, filesystem := range filesystems.List {
-				fmt.Printf("%-18s %8s %-22s %8.2f %8.2f %8.2f %8s %8s %6s %-35s\n", filesystem.Name, filesystem.Pool,
-					filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
-					filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
-					filesystem.MountPoint)
-			}
+	fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
+		"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
+	for _, filesystems := range allfs {
+		for _, filesystem := range filesystems.List {
+			fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
+				filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
+				filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
+				filesystem.MountPoint)
 		}
 	}
 }
 
 //PrintLUNS prints some luns values for all projects in all pools.
-func PrintLUNS() {
+func PrintLUNS(pmap map[string]Projects, fs afero.Fs) {
 	Header("LUNS information")
 	fmt.Printf("%-16s %8s %-15s %8s %5s %-15s %8s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "ANumber", "IGroup",
 		"TGroup", "GUID", "VolSize(GB)", "STotal(GB)")
-	for pool, projects := range POOLSPROJECTS {
-		for _, project := range projects {
-			luns := GetLUNS(pool, project)
+	for pool, projects := range pmap {
+		for _, project := range projects.List {
+			luns := GetLUNS(pool, project.Name)
 			for _, lun := range luns.List {
 				//initiator := strings.Join(lun.InitiatorGroup, "|")
 				fmt.Printf("%-16s %8s %-15s %8s %5d %-15s %8s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,

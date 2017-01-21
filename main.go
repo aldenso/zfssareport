@@ -21,11 +21,6 @@ var (
 	PASSWORD string
 	//URL for zfssa REST api.
 	URL string
-	//POOLS pools in zfssa.
-	POOLS Pools
-	//POOLSPROJECTS map for projects in pools.
-	POOLSPROJECTS = make(map[string][]string)
-
 	// Fs afero fs to help later with testing.
 	Fs = zfssareportfs.InitOSFs()
 
@@ -58,9 +53,12 @@ func main() {
 	if err := CreateDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
-	PrintPools()
-	PrintProjects()
-	PrintFilesystems()
-	PrintLUNS()
+	pools := GetPools()
+	PrintPools(pools, Fs)
+	pmap := CreateMapPoolsProjects(pools)
+	PrintProjects(pmap, Fs)
+	allFS := CreateFSSlice(pmap)
+	PrintFilesystems(allFS, Fs)
+	PrintLUNS(pmap, Fs)
 	fmt.Printf("############# DONE in %s #############\n", time.Since(NOW).String())
 }
