@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"sync"
+
 	"github.com/spf13/afero"
 )
 
@@ -57,10 +59,16 @@ func PrintPools(pools Pools, fs afero.Fs) {
 //CreateMapPoolsProjects create a map for projects in pools.
 func CreateMapPoolsProjects(pools Pools) map[string]Projects {
 	poolsprojects := make(map[string]Projects)
+	var wg sync.WaitGroup
 	for _, pool := range pools.List {
-		projects := GetProjects(pool.Name)
-		poolsprojects[pool.Name] = projects
+		wg.Add(1)
+		go func(pool Pool) {
+			defer wg.Done()
+			projects := GetProjects(pool.Name)
+			poolsprojects[pool.Name] = projects
+		}(pool)
 	}
+	wg.Wait()
 	return poolsprojects
 }
 
@@ -142,14 +150,48 @@ func PrintProjects(pmap map[string]Projects, fs afero.Fs) {
 
 //CreateFSSlice create a map for filesystems
 func CreateFSSlice(pmap map[string]Projects) []Filesystems {
-	var poolsprojectsfs []Filesystems
-	for pool, projects := range pmap {
-		for _, project := range projects.List {
-			filesystems := GetFilesystems(pool, project.Name)
-			poolsprojectsfs = append(poolsprojectsfs, filesystems)
-		}
+	var poolsprojectsfs struct {
+		List []Filesystems
+		mu   sync.Mutex
 	}
-	return poolsprojectsfs
+	var wg sync.WaitGroup
+	for pool, projects := range pmap {
+		wg.Add(1)
+		go func(pool string) {
+			defer wg.Done()
+			for _, project := range projects.List {
+				filesystems := GetFilesystems(pool, project.Name)
+				poolsprojectsfs.mu.Lock()
+				poolsprojectsfs.List = append(poolsprojectsfs.List, *filesystems)
+				poolsprojectsfs.mu.Unlock()
+			}
+		}(pool)
+	}
+	wg.Wait()
+	return poolsprojectsfs.List
+}
+
+//CreateLUNSSlice create a map for filesystems
+func CreateLUNSSlice(pmap map[string]Projects) []LUNS {
+	var poolsprojectsluns struct {
+		List []LUNS
+		mu   sync.Mutex
+	}
+	var wg sync.WaitGroup
+	for pool, projects := range pmap {
+		wg.Add(1)
+		go func(pool string) {
+			defer wg.Done()
+			for _, project := range projects.List {
+				luns := GetLUNS(pool, project.Name)
+				poolsprojectsluns.mu.Lock()
+				poolsprojectsluns.List = append(poolsprojectsluns.List, *luns)
+				poolsprojectsluns.mu.Unlock()
+			}
+		}(pool)
+	}
+	wg.Wait()
+	return poolsprojectsluns.List
 }
 
 //PrintFilesystems prints some filesystems values for all projects in all pools.
@@ -168,19 +210,15 @@ func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 }
 
 //PrintLUNS prints some luns values for all projects in all pools.
-func PrintLUNS(pmap map[string]Projects, fs afero.Fs) {
+func PrintLUNS(allLuns []LUNS, fs afero.Fs) {
 	Header("LUNS information")
 	fmt.Printf("%-16s %8s %-15s %8s %5s %-15s %8s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "ANumber", "IGroup",
 		"TGroup", "GUID", "VolSize(GB)", "STotal(GB)")
-	for pool, projects := range pmap {
-		for _, project := range projects.List {
-			luns := GetLUNS(pool, project.Name)
-			for _, lun := range luns.List {
-				//initiator := strings.Join(lun.InitiatorGroup, "|")
-				fmt.Printf("%-16s %8s %-15s %8s %5d %-15s %8s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
-					lun.AssignedNumber, lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
-					lun.SpaceTotal/(1024*1024*1024))
-			}
+	for _, luns := range allLuns {
+		for _, lun := range luns.List {
+			fmt.Printf("%-16s %8s %-15s %8s %5d %-15s %8s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
+				lun.AssignedNumber, lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
+				lun.SpaceTotal/(1024*1024*1024))
 		}
 	}
 }

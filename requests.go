@@ -63,8 +63,8 @@ func GetProjects(pool string) Projects {
 }
 
 //GetFilesystems get all Filesystems in a project.
-func GetFilesystems(pool string, project string) Filesystems {
-	var filesystems Filesystems
+func GetFilesystems(pool string, project string) *Filesystems {
+	filesystems := &Filesystems{}
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -90,8 +90,8 @@ func GetFilesystems(pool string, project string) Filesystems {
 }
 
 //GetLUNS get all LUNS in a project.
-func GetLUNS(pool string, project string) LUNS {
-	var luns LUNS
+func GetLUNS(pool string, project string) *LUNS {
+	luns := &LUNS{}
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

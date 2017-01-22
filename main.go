@@ -59,6 +59,7 @@ func main() {
 	PrintProjects(pmap, Fs)
 	allFS := CreateFSSlice(pmap)
 	PrintFilesystems(allFS, Fs)
-	PrintLUNS(pmap, Fs)
+	allLUNS := CreateLUNSSlice(pmap)
+	PrintLUNS(allLUNS, Fs)
 	fmt.Printf("############# DONE in %s #############\n", time.Since(NOW).String())
 }
