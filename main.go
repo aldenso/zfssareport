@@ -28,7 +28,7 @@ var (
 	NOW = time.Now()
 
 	template   bool
-	configfile string
+	configfile = "config.yml"
 	dirname    string
 )
 
@@ -48,7 +48,7 @@ func main() {
 			os.Exit(0)
 		}
 	}
-	ReadConfigFile()
+	IP, USER, PASSWORD, URL = ReadConfigFile()
 	dirname = fmt.Sprintf("%s_%s", IP, strings.Replace(NOW.Format(time.RFC3339), ":", "", -1))
 	if err := CreateDir(Fs, dirname); err != nil {
 		log.Fatal(err)

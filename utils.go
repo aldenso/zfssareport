@@ -20,7 +20,6 @@ password: password`
 
 // CreateTemplate fucntion to create a base remgo.toml file
 func CreateTemplate(fs afero.Fs) (string, error) {
-	configfile := "config.yml"
 	if _, err := fs.Stat(configfile); err != nil {
 		if os.IsNotExist(err) {
 			file, err := fs.Create(configfile)
@@ -39,17 +38,18 @@ func CreateTemplate(fs afero.Fs) (string, error) {
 }
 
 //ReadConfigFile read yaml config file for zfssa.
-func ReadConfigFile() {
+func ReadConfigFile() (string, string, string, string) {
 	viper.SetConfigFile(configfile)
 	viper.SetConfigType("yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	IP = viper.GetString("ip")
-	USER = viper.GetString("user")
-	PASSWORD = viper.GetString("password")
-	URL = fmt.Sprintf("https://%s:215/api", IP)
+	ip := viper.GetString("ip")
+	user := viper.GetString("user")
+	password := viper.GetString("password")
+	url := fmt.Sprintf("https://%s:215/api", ip)
+	return ip, user, password, url
 }
 
 //CreateDir create directory for collected info.
