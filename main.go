@@ -53,6 +53,7 @@ func main() {
 	if err := CreateDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
+	getZFSSAVersion()
 	pools := GetPools()
 	PrintPools(pools, Fs)
 	pmap := CreateMapPoolsProjects(pools)

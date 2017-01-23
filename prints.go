@@ -9,15 +9,9 @@ import (
 	"sync"
 
 	"github.com/aldenso/zfssareport/model"
+	"github.com/aldenso/zfssareport/utils"
 	"github.com/spf13/afero"
 )
-
-//Header print header for output.
-func Header(msg string) {
-	fmt.Println("#####################################################################################################################")
-	fmt.Printf("## %-111s ##\n", msg)
-	fmt.Println("#####################################################################################################################")
-}
 
 //PrintPools prints some pools values and create file to dump all values.
 func PrintPools(pools model.Pools, fs afero.Fs) {
@@ -33,7 +27,7 @@ func PrintPools(pools model.Pools, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	Header("Pools information")
+	utils.Header("Pools information")
 	fmt.Printf("%-6s %-8s %-35s %10s %10s %10s %10s %10s %10s\n",
 		"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
 		"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
@@ -98,7 +92,7 @@ func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
 		log.Fatal(err)
 	}
 
-	Header("Projects information")
+	utils.Header("Projects information")
 	fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
 	fmt.Println("=====================================================================================================================")
 	for _, projects := range pmap {
@@ -221,7 +215,7 @@ func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	Header("Filesystems information")
+	utils.Header("Filesystems information")
 	fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
 		"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
 	fmt.Println("=====================================================================================================================")
@@ -294,7 +288,7 @@ func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	Header("LUNS information")
+	utils.Header("LUNS information")
 	fmt.Printf("%-8s %-8s %-15s %9s %4s %-15s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "Num", "InitiatorGrp",
 		"GUID", "VolS(GB)", "Total(GB)")
 	fmt.Println("=====================================================================================================================")

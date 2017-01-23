@@ -117,3 +117,29 @@ func GetLUNS(pool string, project string) *model.LUNS {
 	}
 	return luns
 }
+
+func getZFSSAVersion() {
+	version := &model.Version{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/system/v1/version", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&version)
+	if err != nil {
+		log.Fatal(err)
+	}
+	version.PrintVersionInfo()
+}
