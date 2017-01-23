@@ -1,10 +1,12 @@
 package main
 
+import "github.com/aldenso/zfssareport/model"
+
 var (
-	testPools = Pools{[]Pool{{Status: "online",
+	testPools = model.Pools{[]model.Pool{{Status: "online",
 		Profile: "mirror",
 		Name:    "pool_0",
-		PoolUsage: PoolUsage{Available: 3.7345023488e+10,
+		PoolUsage: model.PoolUsage{Available: 3.7345023488e+10,
 			UsageSnapshots: 38912,
 			Used:           1.059328e+06,
 			Compression:    1,
@@ -16,7 +18,7 @@ var (
 		Peer:  "00000000-0000-0000-0000-000000000000",
 		Owner: "zfs",
 		ASN:   "c79d8f07-4146-4ca8-d0a1-ef0d2bcea217"}}}
-	testProjects = Projects{[]Project{{ACLinherit: "restricted",
+	testProjects = model.Projects{[]model.Project{{ACLinherit: "restricted",
 		ACLMode: "discard", ATime: true, CanonicalName: "pool_0/local/default",
 		CheckSum: "fletcher4", Compression: "off", CompressRatio: 100, Copies: 1,
 		Creation: "20170108T18:31:33", Dedup: false, DefaultGroup: "other",
@@ -30,7 +32,7 @@ var (
 		Pool: "pool_0", Quota: 0, ReadOnly: false, RecordSize: 0, Reservation: 0,
 		Rstchown: true, SecondaryCache: "all", ShareDAV: "", ShareFTP: "", ShareNFS: "on",
 		ShareSFTP: "", ShareSMB: "off", ShareTFTP: "", SnapDir: "hidden",
-		ProjectSource: ProjectSource{ACLinherit: "inherited",
+		ProjectSource: model.ProjectSource{ACLinherit: "inherited",
 			ACLMode: "inherited", ATime: "inherited", CheckSum: "inherited",
 			Compression: "inherited", Copies: "inherited", Dedup: "inherited",
 			Exported: "local", KeyChangeDate: "inherited", Logbias: "inherited",
@@ -42,7 +44,7 @@ var (
 		SpaceAvailable: 3.4614091264e+10, SpaceData: 31744, SpaceSnapShots: 0,
 		SpaceTotal: 31744, SpaceUnusedRes: 0, SpaceUnusedResShares: 0, VScan: false}}}
 
-	testFilesystems = []Filesystems{Filesystems{[]Filesystem{Filesystem{
+	testFilesystems = []model.Filesystems{model.Filesystems{[]model.Filesystem{model.Filesystem{
 		ACLinherit: "restricted", ACLMode: "discard", ATime: true, CanonicalName: "pool_0/local/test1/test1",
 		CaseSensitivity: "mixed", CheckSum: "fletcher4", Compression: "off", CompressRatio: 100, Copies: 1,
 		Creation: "20170116T19:11:01", Dedup: false, Encryption: "off", Exported: true,
@@ -53,7 +55,7 @@ var (
 		RootGroup: "other", RootPermissions: "700", RootUser: "nobody", Rstchown: true, SecondaryCache: "all",
 		Shadow: "none", ShareDAV: "", ShareFTP: "", ShareNFS: "on", ShareSFTP: "", ShareSMB: "off", ShareTFTP: "",
 		SnapDir: "hidden", SnapLabel: "",
-		FSSource: FSSource{
+		FSSource: model.FSSource{
 			ACLinherit: "inherited", ACLMode: "inherited", ATime: "inherited", CheckSum: "inherited", Compression: "inherited",
 			Copies: "inherited", Dedup: "inherited", Exported: "inherited", KeyChangeDate: "inherited", Logbias: "inherited",
 			MaxBlockSize: "inherited", MountPoint: "inherited", Nbmand: "inherited", ReadOnly: "inherited", RecordSize: "inherited",
@@ -108,7 +110,7 @@ func Example_PrintPools() {
 }
 
 func Example_PrintProjects() {
-	pmap := make(map[string]Projects)
+	pmap := make(map[string]model.Projects)
 	for _, pool := range testPools.List {
 		pmap[pool.Name] = testProjects
 	}
@@ -123,7 +125,7 @@ func Example_PrintProjects() {
 }
 
 func Example_PrintFilesystems() {
-	pmap := make(map[string]Projects)
+	pmap := make(map[string]model.Projects)
 	for _, pool := range testPools.List {
 		pmap[pool.Name] = testProjects
 	}

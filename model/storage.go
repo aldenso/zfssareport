@@ -1,4 +1,4 @@
-package main
+package model
 
 //Pools struct for ZFS pools.
 type Pools struct {

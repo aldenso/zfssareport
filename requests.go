@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/aldenso/zfssareport/model"
 )
 
 //GetPools get all pools.
-func GetPools() Pools {
-	var pools Pools
+func GetPools() model.Pools {
+	var pools model.Pools
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -36,8 +38,8 @@ func GetPools() Pools {
 }
 
 //GetProjects get all projects in a pool.
-func GetProjects(pool string) Projects {
-	var projects Projects
+func GetProjects(pool string) model.Projects {
+	var projects model.Projects
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -63,8 +65,8 @@ func GetProjects(pool string) Projects {
 }
 
 //GetFilesystems get all Filesystems in a project.
-func GetFilesystems(pool string, project string) *Filesystems {
-	filesystems := &Filesystems{}
+func GetFilesystems(pool string, project string) *model.Filesystems {
+	filesystems := &model.Filesystems{}
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -90,8 +92,8 @@ func GetFilesystems(pool string, project string) *Filesystems {
 }
 
 //GetLUNS get all LUNS in a project.
-func GetLUNS(pool string, project string) *LUNS {
-	luns := &LUNS{}
+func GetLUNS(pool string, project string) *model.LUNS {
+	luns := &model.LUNS{}
 	HTTPClientCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

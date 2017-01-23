@@ -8,6 +8,7 @@ import (
 
 	"sync"
 
+	"github.com/aldenso/zfssareport/model"
 	"github.com/spf13/afero"
 )
 
@@ -19,7 +20,7 @@ func Header(msg string) {
 }
 
 //PrintPools prints some pools values and create file to dump all values.
-func PrintPools(pools Pools, fs afero.Fs) {
+func PrintPools(pools model.Pools, fs afero.Fs) {
 	//POOLS = GetPools()
 	file, err := CreateFile(fs, dirname, "pools.csv")
 	if err != nil {
@@ -58,12 +59,12 @@ func PrintPools(pools Pools, fs afero.Fs) {
 }
 
 //CreateMapPoolsProjects create a map for projects in pools.
-func CreateMapPoolsProjects(pools Pools) map[string]Projects {
-	poolsprojects := make(map[string]Projects)
+func CreateMapPoolsProjects(pools model.Pools) map[string]model.Projects {
+	poolsprojects := make(map[string]model.Projects)
 	var wg sync.WaitGroup
 	for _, pool := range pools.List {
 		wg.Add(1)
-		go func(pool Pool) {
+		go func(pool model.Pool) {
 			defer wg.Done()
 			projects := GetProjects(pool.Name)
 			poolsprojects[pool.Name] = projects
@@ -74,7 +75,7 @@ func CreateMapPoolsProjects(pools Pools) map[string]Projects {
 }
 
 //PrintProjects prints some projects values for all pools.
-func PrintProjects(pmap map[string]Projects, fs afero.Fs) {
+func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
 	file, err := CreateFile(fs, dirname, "projects.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -151,16 +152,16 @@ func PrintProjects(pmap map[string]Projects, fs afero.Fs) {
 }
 
 //CreateFSSlice create a map for filesystems
-func CreateFSSlice(pmap map[string]Projects) []Filesystems {
+func CreateFSSlice(pmap map[string]model.Projects) []model.Filesystems {
 	var poolsprojectsfs struct {
-		List []Filesystems
+		List []model.Filesystems
 		mu   sync.Mutex
 	}
 	var wg sync.WaitGroup
 	for pool := range pmap {
 		for _, project := range pmap[pool].List {
 			wg.Add(1)
-			go func(pool string, project Project) {
+			go func(pool string, project model.Project) {
 				defer wg.Done()
 				//fmt.Println("get fs proj:", project.Name, "pool", pool)
 				filesystems := GetFilesystems(pool, project.Name)
@@ -176,16 +177,16 @@ func CreateFSSlice(pmap map[string]Projects) []Filesystems {
 }
 
 //CreateLUNSSlice create a map for filesystems
-func CreateLUNSSlice(pmap map[string]Projects) []LUNS {
+func CreateLUNSSlice(pmap map[string]model.Projects) []model.LUNS {
 	var poolsprojectsluns struct {
-		List []LUNS
+		List []model.LUNS
 		mu   sync.Mutex
 	}
 	var wg sync.WaitGroup
 	for pool := range pmap {
 		for _, project := range pmap[pool].List {
 			wg.Add(1)
-			go func(pool string, project Project) {
+			go func(pool string, project model.Project) {
 				defer wg.Done()
 				//fmt.Println("get lun proj:", project.Name, "pool", pool)
 				luns := GetLUNS(pool, project.Name)
@@ -200,7 +201,7 @@ func CreateLUNSSlice(pmap map[string]Projects) []LUNS {
 }
 
 //PrintFilesystems prints some filesystems values for all projects in all pools.
-func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
+func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 	file, err := CreateFile(fs, dirname, "filesystems.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -276,7 +277,7 @@ func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 }
 
 //PrintLUNS prints some luns values for all projects in all pools.
-func PrintLUNS(allLuns []LUNS, fs afero.Fs) {
+func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 	file, err := CreateFile(fs, dirname, "luns.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -321,7 +322,7 @@ func PrintLUNS(allLuns []LUNS, fs afero.Fs) {
 				/*line6*/ lun.KeyChangeDate, lun.KeyStatus, lun.Logbias, lun.LUNumber, lun.MaxBlockSize,
 				/*line7*/ lun.Nodestroy, lun.SecondaryCache, lun.SnapLabel, lun.Sparse, lun.VolBlockSize,
 				/*line8*/ lun.WriteCache, lun.LunSource.CheckSum, lun.LunSource.Compression, lun.LunSource.Copies, lun.LunSource.Dedup,
-				/*line9*/ lun.WriteCache, lun.LunSource.Exported, lun.LunSource.KeyChangeDate, lun.LunSource.Logbias, lun.LunSource.MaxBlockSize,
+				/*line9*/ lun.LunSource.Encryption, lun.LunSource.Exported, lun.LunSource.KeyChangeDate, lun.LunSource.Logbias, lun.LunSource.MaxBlockSize,
 				/*line10*/ lun.LunSource.RRSRCActions, lun.LunSource.SecondaryCache)
 
 			record := strings.Split(line, ";")
