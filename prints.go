@@ -199,6 +199,25 @@ func CreateLUNSSlice(pmap map[string]Projects) []LUNS {
 
 //PrintFilesystems prints some filesystems values for all projects in all pools.
 func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
+	file, err := CreateFile(fs, dirname, "filesystems.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"name", "pool", "project", "reservation", "quota", "space_total", "root_user", "root_group", "root_permissions",
+		"mountpoint", "space_available", "space_data", "space_snapshot", "space_unused_res", "aclinherit", "aclmode", "atime",
+		"canonical_name", "case_sensitivity", "checksum", "compression", "compressratio", "copies", "creation", "dedup", "encryption",
+		"exported", "href", "id", "keychangedata", "keystatus", "logbias", "maxblocksize", "nbmand", "nodedestroy", "normalization",
+		"quota_snap", "readonly", "record_size", "reservation_snap", "rstchown", "secondarycache", "shadow", "sharedav", "shareftp",
+		"sharenfs", "sharesftp", "sharesmb", "sharetftp", "snapdir", "snaplabel", "utf8only", "vscan", "source_aclinherit", "source_aclmode",
+		"source_atime", "source_checksum", "source_compression", "source_copies", "source_dedup", "source_exported", "source_keychangedata",
+		"source_logbias", "source_maxblocksize", "source_mountpoint", "source_nbmand", "source_readonly", "source_record_size", "source_reservation",
+		"source_rrsrc_actions", "source_rstchown", "source_secondarycache", "source_sharedav", "source_shareftp", "source_sharenfs", "source_sharesftp",
+		"source_sharesmb", "source_sharetftp", "source_snapdir", "source_vscan"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
 	Header("Filesystems information")
 	fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
 		"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
@@ -208,7 +227,48 @@ func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 				filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
 				filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
 				filesystem.MountPoint)
+
+			line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;"+
+				/*line2*/ "%.2f;%s;%s;%s;%s;"+
+				/*line3*/ "%.2f;%.2f;%.2f;%.2f;%s;"+
+				/*line4*/ "%s;%t;%s;%s;%s;"+
+				/*line5*/ "%s;%.2f;%d;%s;%t;"+
+				/*line6*/ "%s;%t;%s;%s;%s;"+
+				/*line7*/ "%s;%s;%d;%t;%t;"+
+				/*line8*/ "%s;%t;%t;%.2f;%t;"+
+				/*line9*/ "%t;%s;%s;%s;%s;"+
+				/*line10*/ "%s;%s;%s;%s;%s;"+
+				/*line11*/ "%s;%t;%t;%s;%s;"+
+				/*line12*/ "%s;%s;%s;%s;%s;"+
+				/*line13*/ "%s;%s;%s;%s;%s;"+
+				/*line14*/ "%s;%s;%s;%s;%s;"+
+				/*line15*/ "%s;%s;%s;%s;%s;"+
+				/*line16*/ "%s;%s;%s;%s;%s",
+				filesystem.Name, filesystem.Pool, filesystem.Project, filesystem.Reservation, filesystem.Quota,
+				/*line2*/ filesystem.SpaceTotal, filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions, filesystem.MountPoint,
+				/*line3*/ filesystem.SpaceAvailable, filesystem.SpaceData, filesystem.SpaceSnapShots, filesystem.SpaceUnusedRes, filesystem.ACLinherit,
+				/*line4*/ filesystem.ACLMode, filesystem.ATime, filesystem.CanonicalName, filesystem.CaseSensitivity, filesystem.CheckSum,
+				/*line5*/ filesystem.Compression, filesystem.CompressRatio, filesystem.Copies, filesystem.Creation, filesystem.Dedup,
+				/*line6*/ filesystem.Encryption, filesystem.Exported, filesystem.HREF, filesystem.ID, filesystem.KeyChangeDate,
+				/*line7*/ filesystem.KeyStatus, filesystem.Logbias, filesystem.MaxBlockSize, filesystem.Nbmand, filesystem.Nodestroy,
+				/*line8*/ filesystem.Normalization, filesystem.QuotaSnap, filesystem.ReadOnly, filesystem.RecordSize, filesystem.ReservationSnap,
+				/*line9*/ filesystem.Rstchown, filesystem.SecondaryCache, filesystem.Shadow, filesystem.ShareDAV, filesystem.ShareFTP,
+				/*line10*/ filesystem.ShareNFS, filesystem.ShareSFTP, filesystem.ShareSMB, filesystem.ShareTFTP, filesystem.SnapDir,
+				/*line11*/ filesystem.SnapLabel, filesystem.UTF8Only, filesystem.VScan, filesystem.FSSource.ACLinherit, filesystem.FSSource.ACLMode,
+				/*line12*/ filesystem.FSSource.ATime, filesystem.FSSource.CheckSum, filesystem.FSSource.Compression, filesystem.FSSource.Copies, filesystem.FSSource.Dedup,
+				/*line13*/ filesystem.FSSource.Exported, filesystem.FSSource.KeyChangeDate, filesystem.FSSource.Logbias, filesystem.FSSource.MaxBlockSize, filesystem.FSSource.MountPoint,
+				/*line14*/ filesystem.FSSource.Nbmand, filesystem.FSSource.ReadOnly, filesystem.FSSource.RecordSize, filesystem.FSSource.Reservation, filesystem.FSSource.RRSRCActions,
+				/*line15*/ filesystem.FSSource.Rstchown, filesystem.FSSource.SecondaryCache, filesystem.FSSource.ShareDAV, filesystem.FSSource.ShareFTP, filesystem.FSSource.ShareNFS,
+				/*line16*/ filesystem.FSSource.ShareSFTP, filesystem.FSSource.ShareSMB, filesystem.FSSource.ShareTFTP, filesystem.FSSource.SnapDir, filesystem.FSSource.VScan)
+			record := strings.Split(line, ";")
+			if err := writer.Write(record); err != nil {
+				log.Fatal(err)
+			}
 		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
 	}
 }
 
