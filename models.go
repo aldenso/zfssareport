@@ -252,19 +252,7 @@ type LUN struct {
 	Project        string   `json:"project"`
 	SecondaryCache string   `json:"secondarycache"`
 	SnapLabel      string   `json:"snaplabel,omitempty"`
-	Source         struct {
-		CheckSum       string `json:"checksum"`
-		Compression    string `json:"compression"`
-		Copies         string `json:"copies"`
-		Dedup          string `json:"dedup"`
-		Encryption     string `json:"encryption"`
-		Exported       string `json:"exported"`
-		KeyChangeDate  string `json:"keychangedate"`
-		Logbias        string `json:"logbias"`
-		MaxBlockSize   string `json:"maxblocksize"`
-		RRSRCActions   string `json:"rrsrc_actions"`
-		SecondaryCache string `json:"secondarycache"`
-	}
+	LunSource      `json:"source"`
 	SpaceAvailable float64 `json:"space_available"`
 	SpaceData      float64 `json:"space_data"`
 	SpaceSnapShots float64 `json:"space_snapshots"`
@@ -275,4 +263,19 @@ type LUN struct {
 	VolBlockSize   int     `json:"volblocksize"`
 	VolSize        float64 `json:"volsize"`
 	WriteCache     bool    `json:"writecache"`
+}
+
+//LunSource struct for source in LUN struct.
+type LunSource struct {
+	CheckSum       string `json:"checksum"`
+	Compression    string `json:"compression"`
+	Copies         string `json:"copies"`
+	Dedup          string `json:"dedup"`
+	Encryption     string `json:"encryption"`
+	Exported       string `json:"exported"`
+	KeyChangeDate  string `json:"keychangedate"`
+	Logbias        string `json:"logbias"`
+	MaxBlockSize   string `json:"maxblocksize"`
+	RRSRCActions   string `json:"rrsrc_actions"`
+	SecondaryCache string `json:"secondarycache"`
 }

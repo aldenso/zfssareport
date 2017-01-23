@@ -36,6 +36,7 @@ func PrintPools(pools Pools, fs afero.Fs) {
 	fmt.Printf("%-6s %-8s %-35s %10s %10s %10s %10s %10s %10s\n",
 		"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
 		"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
+	fmt.Println("=====================================================================================================================")
 	for _, pool := range pools.List {
 		fmt.Printf("%-6s %-8s %-35s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n",
 			pool.Name, pool.Status, pool.Profile, pool.PoolUsage.Total/(1024*1024*1024), pool.PoolUsage.Available/(1024*1024*1024),
@@ -98,6 +99,7 @@ func PrintProjects(pmap map[string]Projects, fs afero.Fs) {
 
 	Header("Projects information")
 	fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
+	fmt.Println("=====================================================================================================================")
 	for _, projects := range pmap {
 		//projects := GetProjects(pool.Name)
 		for _, project := range projects.List {
@@ -221,6 +223,7 @@ func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 	Header("Filesystems information")
 	fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
 		"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
+	fmt.Println("=====================================================================================================================")
 	for _, filesystems := range allfs {
 		for _, filesystem := range filesystems.List {
 			fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
@@ -274,14 +277,61 @@ func PrintFilesystems(allfs []Filesystems, fs afero.Fs) {
 
 //PrintLUNS prints some luns values for all projects in all pools.
 func PrintLUNS(allLuns []LUNS, fs afero.Fs) {
+	file, err := CreateFile(fs, dirname, "luns.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"name", "pool", "project", "status", "assignednumber", "initiatorgroup", "targetgroup",
+		"lunguid", "volsize", "space_available", "space_data", "space_snapshots", "space_total", "canonical_name",
+		"checksum", "compression", "compressratio", "copies", "creation", "dedup", "encryption", "exported",
+		"fixednumber", "href", "id", "keychangedate", "keystatus", "logbias", "lunumber", "maxblocksize", "nodestroy",
+		"secondarycache", "snaplabel", "sparse", "volblocksize", "writecache", "source_checksum", "source_compression",
+		"source_copies", "source_dedup", "source_encryption", "source_exported", "source_keychangedate", "source_logbias",
+		"source_maxblocksize", "source_rrsrc_actions", "source_secondary"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
 	Header("LUNS information")
-	fmt.Printf("%-16s %8s %-15s %8s %5s %-15s %8s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "ANumber", "IGroup",
-		"TGroup", "GUID", "VolSize(GB)", "STotal(GB)")
+	fmt.Printf("%-8s %-8s %-15s %9s %4s %-15s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "Num", "InitiatorGrp",
+		"GUID", "VolS(GB)", "Total(GB)")
+	fmt.Println("=====================================================================================================================")
 	for _, luns := range allLuns {
 		for _, lun := range luns.List {
-			fmt.Printf("%-16s %8s %-15s %8s %5d %-15s %8s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
-				lun.AssignedNumber, lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
+			fmt.Printf("%-8s %-8s %-15s %9s %4d %-15s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
+				lun.AssignedNumber, lun.InitiatorGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
 				lun.SpaceTotal/(1024*1024*1024))
+
+			line := fmt.Sprintf("%s;%s;%s;%s;%d;"+
+				/*line2*/ "%s;%s;%s;%.2f;%.2f;"+
+				/*line3*/ "%.2f;%.2f;%.2f;%s;%s;"+
+				/*line4*/ "%s;%.2f;%d;%s;%t;"+
+				/*line5*/ "%s;%t;%t;%s;%s;"+
+				/*line6*/ "%s;%s;%s;%s;%d;"+
+				/*line7*/ "%t;%s;%s;%t;%d;"+
+				/*line8*/ "%t;%s;%s;%s;%s;"+
+				/*line9*/ "%s;%s;%s;%s;%s;"+
+				/*line10*/ "%s;%s",
+				lun.Name, lun.Pool, lun.Project, lun.Status, lun.AssignedNumber,
+				/*line2*/ lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize, lun.SpaceAvailable,
+				/*line3*/ lun.SpaceData, lun.SpaceSnapShots, lun.SpaceTotal, lun.CanonicalName, lun.Checksum,
+				/*line4*/ lun.Compression, lun.CompressRatio, lun.Copies, lun.Creation, lun.Dedup,
+				/*line5*/ lun.Encryption, lun.Exported, lun.FixedNumber, lun.HREF, lun.ID,
+				/*line6*/ lun.KeyChangeDate, lun.KeyStatus, lun.Logbias, lun.LUNumber, lun.MaxBlockSize,
+				/*line7*/ lun.Nodestroy, lun.SecondaryCache, lun.SnapLabel, lun.Sparse, lun.VolBlockSize,
+				/*line8*/ lun.WriteCache, lun.LunSource.CheckSum, lun.LunSource.Compression, lun.LunSource.Copies, lun.LunSource.Dedup,
+				/*line9*/ lun.WriteCache, lun.LunSource.Exported, lun.LunSource.KeyChangeDate, lun.LunSource.Logbias, lun.LunSource.MaxBlockSize,
+				/*line10*/ lun.LunSource.RRSRCActions, lun.LunSource.SecondaryCache)
+
+			record := strings.Split(line, ";")
+			if err := writer.Write(record); err != nil {
+				log.Fatal(err)
+			}
 		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
 	}
 }
