@@ -155,19 +155,21 @@ func CreateFSSlice(pmap map[string]Projects) []Filesystems {
 		mu   sync.Mutex
 	}
 	var wg sync.WaitGroup
-	for pool, projects := range pmap {
-		wg.Add(1)
-		go func(pool string) {
-			defer wg.Done()
-			for _, project := range projects.List {
+	for pool := range pmap {
+		for _, project := range pmap[pool].List {
+			wg.Add(1)
+			go func(pool string, project Project) {
+				defer wg.Done()
+				//fmt.Println("get fs proj:", project.Name, "pool", pool)
 				filesystems := GetFilesystems(pool, project.Name)
 				poolsprojectsfs.mu.Lock()
 				poolsprojectsfs.List = append(poolsprojectsfs.List, *filesystems)
 				poolsprojectsfs.mu.Unlock()
-			}
-		}(pool)
+			}(pool, project)
+		}
+		wg.Wait()
 	}
-	wg.Wait()
+
 	return poolsprojectsfs.List
 }
 
@@ -178,19 +180,20 @@ func CreateLUNSSlice(pmap map[string]Projects) []LUNS {
 		mu   sync.Mutex
 	}
 	var wg sync.WaitGroup
-	for pool, projects := range pmap {
-		wg.Add(1)
-		go func(pool string) {
-			defer wg.Done()
-			for _, project := range projects.List {
+	for pool := range pmap {
+		for _, project := range pmap[pool].List {
+			wg.Add(1)
+			go func(pool string, project Project) {
+				defer wg.Done()
+				//fmt.Println("get lun proj:", project.Name, "pool", pool)
 				luns := GetLUNS(pool, project.Name)
 				poolsprojectsluns.mu.Lock()
 				poolsprojectsluns.List = append(poolsprojectsluns.List, *luns)
 				poolsprojectsluns.mu.Unlock()
-			}
-		}(pool)
+			}(pool, project)
+		}
+		wg.Wait()
 	}
-	wg.Wait()
 	return poolsprojectsluns.List
 }
 
