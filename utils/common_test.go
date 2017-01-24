@@ -11,7 +11,6 @@ import (
 
 var (
 	FsMem          = zfssareportfs.InitMemFs()
-	Fs             = zfssareportfs.InitOSFs()
 	tempIP         = "192.168.56.150"
 	tempUser       = "root"
 	tempPassword   = "password"
@@ -81,7 +80,9 @@ func Test_CloseFile(t *testing.T) {
 }
 
 func Test_ZipDir(t *testing.T) {
-	if err := ZipDir(FsMem, dirtest); err != nil {
-		t.Errorf("Failed to create zip file: '%v'", err)
+	CreateFile(FsMem, dirtest, "test.txt")
+	err := ZipDir(FsMem, dirtest)
+	if err != nil {
+		t.Errorf("failed to create zip: '%v'\n", err)
 	}
 }

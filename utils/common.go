@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
@@ -59,8 +61,22 @@ func ReadConfigFile(configfile string) (string, string, string, string) {
 	ip := viper.GetString("ip")
 	user := viper.GetString("user")
 	password := viper.GetString("password")
+	if password == "" {
+		password = credentials()
+	}
 	url := fmt.Sprintf("https://%s:215/api", ip)
 	return ip, user, password, url
+}
+
+func credentials() string {
+	fmt.Printf("Enter Password:\n")
+	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		log.Fatalf("Failed to read password: '%v'\n", err)
+	}
+	password := string(bytePassword)
+
+	return strings.TrimSpace(password)
 }
 
 //CreateDir create directory for collected info.
@@ -91,7 +107,6 @@ func CloseFile(file afero.File) error {
 
 //ZipDir to create a zip file of the output directory.
 func ZipDir(fs afero.Fs, source string) error {
-	CreateFile(fs, source, "test.txt")
 	zipfile, err := fs.Create(source + ".zip")
 	if err != nil {
 		return err

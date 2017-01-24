@@ -137,6 +137,9 @@ func getZFSSAVersion() {
 		fmt.Println(err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Fatalf("Status: '%s', check your credentials.", resp.Status)
+	}
 	err = json.NewDecoder(resp.Body).Decode(&version)
 	if err != nil {
 		log.Fatal(err)
