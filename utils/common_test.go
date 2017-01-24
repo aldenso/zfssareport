@@ -79,3 +79,9 @@ func Test_CloseFile(t *testing.T) {
 		t.Errorf("CloseFile did not close file: '%s', err: '%v'\n", dirtest+"/"+filetestname, err)
 	}
 }
+
+func Test_ZipDir(t *testing.T) {
+	if err := ZipDir(FsMem, dirtest); err != nil {
+		t.Errorf("Failed to create zip file: '%v'", err)
+	}
+}

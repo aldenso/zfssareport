@@ -65,5 +65,8 @@ func main() {
 	PrintFilesystems(allFS, Fs)
 	allLUNS := CreateLUNSSlice(pmap)
 	PrintLUNS(allLUNS, Fs)
+	if err := utils.ZipDir(Fs, dirname); err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("############# DONE in %s #############\n", time.Since(NOW).String())
 }
