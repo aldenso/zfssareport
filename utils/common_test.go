@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"testing"
@@ -10,42 +10,37 @@ import (
 )
 
 var (
-	FsMem        = zfssareportfs.InitMemFs()
-	tempIP       = "192.168.56.150"
-	tempUser     = "root"
-	tempPassword = "password"
-	dirtest      = fmt.Sprintf("%s_2017-01-21T220321-0400", tempIP)
-	filetestname = "poolstest.csv"
-	filetest     afero.File
+	FsMem          = zfssareportfs.InitMemFs()
+	Fs             = zfssareportfs.InitOSFs()
+	tempIP         = "192.168.56.150"
+	tempUser       = "root"
+	tempPassword   = "password"
+	dirtest        = fmt.Sprintf("%s_2017-01-21T220321-0400", tempIP)
+	testconfigfile = "../config.yml"
+	filetestname   = "poolstest.csv"
+	filetest       afero.File
 )
 
 func Test_CreateTemplate(t *testing.T) {
-	msg, err := CreateTemplate(FsMem)
+	msg, err := CreateTemplate(FsMem, testconfigfile)
 	if err != nil {
 		t.Errorf("Expected not nil for CreateTemplate, got '%s'\n", err)
 	}
 	if msg != configcreated {
-		t.Errorf("Expected template '%s', got '%s'\n", configcreated, msg)
-	}
-	content, err := afero.ReadFile(FsMem, "config.yml")
-	if err != nil {
-		t.Error("Failed to read config file")
-	}
-	if string(content) != templatecontent {
-		t.Errorf("Expected '%s', got '%s'\n", templatecontent, string(content))
+		t.Errorf("Expected template '%s'\n, got '%s'\n", configcreated, msg)
 	}
 	//Test config
-	msg, err = CreateTemplate(FsMem)
+	msg, err = CreateTemplate(FsMem, testconfigfile)
 	if err != nil {
 		t.Errorf("Expected not nil for CreateTemplate, got '%s'\n", err)
 	}
 	if msg != configexists {
-		t.Errorf("Expected template '%s', got '%s'\n", configexists, msg)
+		t.Errorf("Expected template '%s'\n, got '%s'\n", configexists, msg)
 	}
 }
 
 func Test_ReadConfigFile(t *testing.T) {
-	ip, user, password, _ := ReadConfigFile()
+	ip, user, password, _ := ReadConfigFile(testconfigfile)
 	if ip != tempIP {
 		t.Errorf("Expected '%s', got '%s'\n", tempIP, ip)
 	}

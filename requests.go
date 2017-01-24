@@ -142,4 +142,31 @@ func getZFSSAVersion() {
 		log.Fatal(err)
 	}
 	version.PrintVersionInfo()
+	version.WriteCSV(Fs, dirname)
+}
+
+func getNetInterfaces() *model.NetInterfaces {
+	interfaces := &model.NetInterfaces{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/network/v1/interfaces", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&interfaces)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return interfaces
 }

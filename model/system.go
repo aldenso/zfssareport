@@ -1,7 +1,14 @@
 package model
 
-import "fmt"
-import "github.com/aldenso/zfssareport/utils"
+import (
+	"encoding/csv"
+	"fmt"
+	"log"
+	"strings"
+
+	"github.com/aldenso/zfssareport/utils"
+	"github.com/spf13/afero"
+)
 
 //Version get ZFSSA version info.
 type Version struct {
@@ -43,6 +50,34 @@ func (version *Version) PrintVersionInfo() {
 		version.NodeName, version.Version, version.Product, version.CSN, version.BootTime)
 }
 
-/*func (version *Version) WriteCSV()  {
+//WriteCSV method to write version info to csv file.
+func (version *Version) WriteCSV(fs afero.Fs, dirname string) {
+	file, err := utils.CreateFile(fs, dirname, "version.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	fileheader := []string{"nodename", "product", "version", "os_version", "csn", "navagent", "navname",
+		"mkt_product", "sp_version", "http", "ssl", "ak_version", "bios_version", "part", "asn",
+		"href", "urn", "install_time", "update_time", "boot_time"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
+		"%s;%s;%s;%s;%s;"+
+		"%s;%s;%s;%s;%s;"+
+		"%s;%s;%s;%s;%s;",
+		version.NodeName, version.Product, version.Version, version.OSVersion, version.CSN,
+		version.NavAgent, version.NavName, version.MktProduct, version.SPVersion, version.HTTP,
+		version.SSL, version.AKVersion, version.BIOSVersion, version.Part, version.ASN,
+		version.HREF, version.URN, version.InstallTime, version.UpdateTime, version.BootTime)
 
-}*/
+	record := strings.Split(line, ";")
+	if err := writer.Write(record); err != nil {
+		log.Fatal(err)
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

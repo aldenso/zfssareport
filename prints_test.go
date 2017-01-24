@@ -3,9 +3,12 @@ package main
 import (
 	"github.com/aldenso/zfssareport/model"
 	"github.com/aldenso/zfssareport/utils"
+	"github.com/aldenso/zfssareport/zfssareportfs"
 )
 
 var (
+	FsMem = zfssareportfs.InitMemFs()
+
 	testPools = model.Pools{[]model.Pool{{Status: "online",
 		Profile: "mirror",
 		Name:    "pool_0",

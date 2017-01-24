@@ -16,7 +16,7 @@ import (
 //PrintPools prints some pools values and create file to dump all values.
 func PrintPools(pools model.Pools, fs afero.Fs) {
 	//POOLS = GetPools()
-	file, err := CreateFile(fs, dirname, "pools.csv")
+	file, err := utils.CreateFile(fs, dirname, "pools.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func CreateMapPoolsProjects(pools model.Pools) map[string]model.Projects {
 
 //PrintProjects prints some projects values for all pools.
 func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
-	file, err := CreateFile(fs, dirname, "projects.csv")
+	file, err := utils.CreateFile(fs, dirname, "projects.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func CreateLUNSSlice(pmap map[string]model.Projects) []model.LUNS {
 
 //PrintFilesystems prints some filesystems values for all projects in all pools.
 func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
-	file, err := CreateFile(fs, dirname, "filesystems.csv")
+	file, err := utils.CreateFile(fs, dirname, "filesystems.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -272,7 +272,7 @@ func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 
 //PrintLUNS prints some luns values for all projects in all pools.
 func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
-	file, err := CreateFile(fs, dirname, "luns.csv")
+	file, err := utils.CreateFile(fs, dirname, "luns.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -323,6 +323,43 @@ func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 			if err := writer.Write(record); err != nil {
 				log.Fatal(err)
 			}
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+//PrintNetInterfaces to print some interfaces info and create csv report.
+func PrintNetInterfaces(netints model.NetInterfaces, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "interfaces.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"interface", "class", "links", "label", "state", "v4addrs", "v4dhcp", "v4directnets",
+		"v6addrs", "v6dhcp", "v6directnets", "curaddrs", "enable", "href", "admin"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	utils.Header("Network Interfaces information")
+	fmt.Printf("%-15s %-8s %-25s %-20s %-25s %5s\n", "interface", "class", "links", "label", "v4addrs", "state")
+	fmt.Println("=====================================================================================================================")
+	for _, interf := range netints.List {
+		interf.PrintNetInterfaceInfo()
+
+		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
+			/*line2*/ "%s;%t;%s;%s;%t;"+
+			/*line3*/ "%s;%s;%t;%s;%t",
+			interf.Interface, interf.Class, interf.Links, interf.Label, interf.State,
+			/*line2*/ interf.V4Addrs, interf.V4DHCP, interf.V4DirectNets, interf.V6Addrs, interf.V6DHCP,
+			/*line3*/ interf.V6DirectNets, interf.CurAddrs, interf.Enable, interf.HREF, interf.Admin)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
 		}
 	}
 	writer.Flush()

@@ -9,6 +9,7 @@ import (
 
 	"time"
 
+	"github.com/aldenso/zfssareport/utils"
 	"github.com/aldenso/zfssareport/zfssareportfs"
 )
 
@@ -40,7 +41,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if template {
-		msg, err := CreateTemplate(Fs)
+		msg, err := utils.CreateTemplate(Fs, configfile)
 		if err != nil {
 			log.Fatalf("Error creating tomfile: %v", err)
 		} else {
@@ -48,12 +49,14 @@ func main() {
 			os.Exit(0)
 		}
 	}
-	IP, USER, PASSWORD, URL = ReadConfigFile()
+	IP, USER, PASSWORD, URL = utils.ReadConfigFile(configfile)
 	dirname = fmt.Sprintf("%s_%s", IP, strings.Replace(NOW.Format(time.RFC3339), ":", "", -1))
-	if err := CreateDir(Fs, dirname); err != nil {
+	if err := utils.CreateDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
 	getZFSSAVersion()
+	interfaces := getNetInterfaces()
+	PrintNetInterfaces(*interfaces, Fs)
 	pools := GetPools()
 	PrintPools(pools, Fs)
 	pmap := CreateMapPoolsProjects(pools)
