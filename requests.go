@@ -173,3 +173,57 @@ func getNetInterfaces() *model.NetInterfaces {
 	}
 	return interfaces
 }
+
+//GetFCInitiators get all initiators in zfssa.
+func GetFCInitiators() *model.FCInitiators {
+	initiators := &model.FCInitiators{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/san/v1/fc/initiators", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&initiators)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return initiators
+}
+
+//GetFCInitiatorGroups get all initiators in zfssa.
+func GetFCInitiatorGroups() *model.FCInitiatorGroups {
+	groups := &model.FCInitiatorGroups{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/san/v1/fc/initiator-groups", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&groups)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return groups
+}

@@ -332,7 +332,7 @@ func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 }
 
 //PrintNetInterfaces to print some interfaces info and create csv report.
-func PrintNetInterfaces(netints model.NetInterfaces, fs afero.Fs) {
+func PrintNetInterfaces(netints *model.NetInterfaces, fs afero.Fs) {
 	file, err := utils.CreateFile(fs, dirname, "interfaces.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -356,6 +356,67 @@ func PrintNetInterfaces(netints model.NetInterfaces, fs afero.Fs) {
 			interf.Interface, interf.Class, interf.Links, interf.Label, interf.State,
 			/*line2*/ interf.V4Addrs, interf.V4DHCP, interf.V4DirectNets, interf.V6Addrs, interf.V6DHCP,
 			/*line3*/ interf.V6DirectNets, interf.CurAddrs, interf.Enable, interf.HREF, interf.Admin)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+//PrintInitiators to print some interfaces info and create csv report.
+func PrintInitiators(initiators *model.FCInitiators, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "fcinitiators.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"alias", "href", "initiator"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	utils.Header("FC Initiators information")
+	fmt.Printf("%-25s %-15s\n", "initiator", "alias")
+	fmt.Println("=====================================================================================================================")
+	for _, initiator := range initiators.List {
+		initiator.PrintInitiatorInfo()
+
+		line := fmt.Sprintf("%s;%s;%s", initiator.Alias, initiator.HREF, initiator.Initiator)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+//PrintFCInitiatorGroups to print some interfaces info and create csv report.
+func PrintFCInitiatorGroups(groups *model.FCInitiatorGroups, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "fcinitiator-groups.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"href", "initiator", "name"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	utils.Header("FC Initiator Groups information")
+	fmt.Println("=====================================================================================================================")
+	for _, group := range groups.List {
+		group.PrintInitiatorGroupInfo()
+
+		line := fmt.Sprintf("%s;%s;%s", group.HREF, group.Initiators, group.Name)
 
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {

@@ -56,7 +56,7 @@ func main() {
 	}
 	getZFSSAVersion()
 	interfaces := getNetInterfaces()
-	PrintNetInterfaces(*interfaces, Fs)
+	PrintNetInterfaces(interfaces, Fs)
 	pools := GetPools()
 	PrintPools(pools, Fs)
 	pmap := CreateMapPoolsProjects(pools)
@@ -65,6 +65,10 @@ func main() {
 	PrintFilesystems(allFS, Fs)
 	allLUNS := CreateLUNSSlice(pmap)
 	PrintLUNS(allLUNS, Fs)
+	fcinitiators := GetFCInitiators()
+	PrintInitiators(fcinitiators, Fs)
+	fcinitiatorgroups := GetFCInitiatorGroups()
+	PrintFCInitiatorGroups(fcinitiatorgroups, Fs)
 	if err := utils.ZipDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}

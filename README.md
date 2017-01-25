@@ -84,4 +84,10 @@ VS02     pool_3   VMWPROD00          online  12  [EVVEP000-009   ] 600144YYYYYYY
 ############# DONE in 1m9.5939805s #############
 ```
 
+The csv reports are placed in a zip file, named after de ip/hostname and the time.
+
+```text
+192.168.56.150_2017-01-24T214531-0400.zip
+```
+
 Issue: When dealing with more than one initiator group for a lun, the zfs api changes AssignedNumber from int to []int, thus we get json: cannot unmarshal. 
