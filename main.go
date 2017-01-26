@@ -55,6 +55,7 @@ func main() {
 		log.Fatal(err)
 	}
 	getZFSSAVersion()
+	getClusterInfo()
 	interfaces := getNetInterfaces()
 	PrintNetInterfaces(interfaces, Fs)
 	pools := GetPools()

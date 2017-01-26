@@ -308,3 +308,33 @@ func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
 	}
 	return groups
 }
+
+func getClusterInfo() {
+	cluster := &model.Cluster{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/hardware/v1/cluster", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Fatalf("Status: '%s', check your credentials.", resp.Status)
+	}
+	err = json.NewDecoder(resp.Body).Decode(&cluster)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cluster.PrintClusterInfo()
+	cluster.WriteCSV(Fs, dirname)
+}
