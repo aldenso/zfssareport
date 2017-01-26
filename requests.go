@@ -227,3 +227,84 @@ func GetFCInitiatorGroups() *model.FCInitiatorGroups {
 	}
 	return groups
 }
+
+//GetFCTargets get all targets in zfssa.
+func GetFCTargets() *model.FCTargets {
+	targets := &model.FCTargets{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/san/v1/fc/targets", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&targets)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return targets
+}
+
+//GetIscsiInitiators get all iscsi initiators in zfssa.
+func GetIscsiInitiators() *model.IscsiInitiators {
+	initiators := &model.IscsiInitiators{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/san/v1/iscsi/initiators", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&initiators)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return initiators
+}
+
+//GetIscsiInitiatorGroups get all iscsi initiators in zfssa.
+func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
+	groups := &model.IscsiInitiatorGroups{}
+	HTTPClientCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	fullurl := fmt.Sprintf("%s/san/v1/iscsi/initiator-groups", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&groups)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return groups
+}

@@ -66,9 +66,15 @@ func main() {
 	allLUNS := CreateLUNSSlice(pmap)
 	PrintLUNS(allLUNS, Fs)
 	fcinitiators := GetFCInitiators()
-	PrintInitiators(fcinitiators, Fs)
+	PrintFCInitiators(fcinitiators, Fs)
 	fcinitiatorgroups := GetFCInitiatorGroups()
 	PrintFCInitiatorGroups(fcinitiatorgroups, Fs)
+	fctargets := GetFCTargets()
+	PrintFCTargets(fctargets, Fs)
+	iscsiinitiators := GetIscsiInitiators()
+	PrintIscsiInitiators(iscsiinitiators, Fs)
+	iscsiinitiatorgroups := GetIscsiInitiatorGroups()
+	PrintIscsiInitiatorGroups(iscsiinitiatorgroups, Fs)
 	if err := utils.ZipDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
