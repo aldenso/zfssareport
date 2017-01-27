@@ -36,10 +36,12 @@ type clusterResource struct {
 func (cluster *Cluster) PrintClusterInfo() {
 	utils.Header("ZFS Storage Appliance Cluster")
 	fmt.Printf("%-30s %-30s %-15s %-15s\n", "description", "peer description", "peer Hostname", "peer state")
+	fmt.Println("=====================================================================================================================")
 	fmt.Printf("%-30s %-30s %-15s %-15s\n", cluster.Description, cluster.PeerDescription, cluster.PeerHostname,
 		cluster.PeerState)
-	fmt.Println("=====================================================================================================================")
+	fmt.Println("#####################################################################################################################")
 	fmt.Printf("%-15s %-15s %-15s %-15s %15s\n", "resource", "type", "owner", "details", "label")
+	fmt.Println("=====================================================================================================================")
 	for _, resource := range cluster.Resources {
 		sliceref := strings.Split(resource.HREF, "/")
 		newhref := sliceref[len(sliceref)-1]

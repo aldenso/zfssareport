@@ -11,13 +11,17 @@ import (
 	"github.com/aldenso/zfssareport/model"
 )
 
+var (
+	//HTTPClientCfg to define http client configuration for requests.
+	HTTPClientCfg = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client = &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+)
+
 //GetPools get all pools.
 func GetPools() model.Pools {
 	var pools model.Pools
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 30 * time.Second}
 	req, err := http.NewRequest("GET", URL+"/storage/v1/pools", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -40,10 +44,6 @@ func GetPools() model.Pools {
 //GetProjects get all projects in a pool.
 func GetProjects(pool string) model.Projects {
 	var projects model.Projects
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/%s/%s/%s", URL, "storage/v1/pools", pool, "projects")
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -67,10 +67,6 @@ func GetProjects(pool string) model.Projects {
 //GetFilesystems get all Filesystems in a project.
 func GetFilesystems(pool string, project string) *model.Filesystems {
 	filesystems := &model.Filesystems{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/storage/v1/pools/%s/projects/%s/filesystems", URL, pool, project)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -94,10 +90,6 @@ func GetFilesystems(pool string, project string) *model.Filesystems {
 //GetLUNS get all LUNS in a project.
 func GetLUNS(pool string, project string) *model.LUNS {
 	luns := &model.LUNS{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/storage/v1/pools/%s/projects/%s/luns", URL, pool, project)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -120,10 +112,6 @@ func GetLUNS(pool string, project string) *model.LUNS {
 
 func getZFSSAVersion() {
 	version := &model.Version{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/system/v1/version", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -150,10 +138,6 @@ func getZFSSAVersion() {
 
 func getNetInterfaces() *model.NetInterfaces {
 	interfaces := &model.NetInterfaces{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/network/v1/interfaces", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -177,10 +161,6 @@ func getNetInterfaces() *model.NetInterfaces {
 //GetFCInitiators get all initiators in zfssa.
 func GetFCInitiators() *model.FCInitiators {
 	initiators := &model.FCInitiators{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/san/v1/fc/initiators", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -204,10 +184,6 @@ func GetFCInitiators() *model.FCInitiators {
 //GetFCInitiatorGroups get all initiators in zfssa.
 func GetFCInitiatorGroups() *model.FCInitiatorGroups {
 	groups := &model.FCInitiatorGroups{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/san/v1/fc/initiator-groups", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -231,10 +207,6 @@ func GetFCInitiatorGroups() *model.FCInitiatorGroups {
 //GetFCTargets get all targets in zfssa.
 func GetFCTargets() *model.FCTargets {
 	targets := &model.FCTargets{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/san/v1/fc/targets", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -258,10 +230,6 @@ func GetFCTargets() *model.FCTargets {
 //GetIscsiInitiators get all iscsi initiators in zfssa.
 func GetIscsiInitiators() *model.IscsiInitiators {
 	initiators := &model.IscsiInitiators{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/san/v1/iscsi/initiators", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -285,10 +253,6 @@ func GetIscsiInitiators() *model.IscsiInitiators {
 //GetIscsiInitiatorGroups get all iscsi initiators in zfssa.
 func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
 	groups := &model.IscsiInitiatorGroups{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/san/v1/iscsi/initiator-groups", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -311,10 +275,6 @@ func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
 
 func getClusterInfo() {
 	cluster := &model.Cluster{}
-	HTTPClientCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
 	fullurl := fmt.Sprintf("%s/hardware/v1/cluster", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
