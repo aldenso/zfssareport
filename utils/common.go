@@ -90,7 +90,7 @@ func CreateDir(fs afero.Fs, name string) error {
 
 //CreateFile create file for info dump.
 func CreateFile(fs afero.Fs, dirname string, filename string) (afero.File, error) {
-	file, err := fs.Create(dirname + "/" + filename)
+	file, err := fs.Create(filepath.Join(dirname, filename))
 	if err != nil {
 		return nil, err
 	}

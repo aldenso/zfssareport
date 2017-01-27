@@ -39,16 +39,33 @@ nodename        version                  product                 csn            
 =====================================================================================================================
 ZFSNODE-001     2013.06.05.6.8,1-1.1     Sun ZFS Storage 7420    YYYXXXZZZZ   Sun Nov 17 2016 08:42:31 GMT+0000 (UTC)
 #####################################################################################################################
+## ZFS Storage Appliance Cluster                                                                                   ##
+#####################################################################################################################
+description                    peer description               peer Hostname   peer state
+=====================================================================================================================
+Active (takeover completed)    Ready (waiting for failback)   ZFSNODE-002     AKCS_STRIPPED
+#####################################################################################################################
+resource        type            owner           details                   label
+=====================================================================================================================
+igb1            private         ZFSNODE-002     [192.168.56.150 ] Untitled Interface
+ipmp1           singleton       ZFSNODE-001     [192.168.32.150 ] ipmp1
+ipmp2           singleton       ZFSNODE-002     [192.168.32.150 ] Ipmp2
+pool_0          singleton       ZFSNODE-002     [20.0T          ]
+pool_1          singleton       ZFSNODE-002     [5.07T          ]
+pool_2          singleton       ZFSNODE-002     [37.4T          ]
+pool_3          singleton       ZFSNODE-001     [               ]
+pool_4          singleton       ZFSNODE-001     [               ]
+#####################################################################################################################
 ## Network Interfaces information                                                                                  ##
 #####################################################################################################################
 interface       class    links                     label                v4addrs                   state
 =====================================================================================================================
 igb1            ip       igb1                      Untitled Interface   192.168.56.150/24           up
-ipmp1           ipmp     ixgbe505000,ixgbe505002   ipmp0                192.168.32.150/24         degraded
+ipmp1           ipmp     ixgbe505000,ixgbe505002   ipmp0                192.168.32.150/24         offline
 ipmp2           ipmp     ixgbe505001,ixgbe505003   Ipmp1                192.168.32.151/24           up
-ixgbe505000     ip       ixgbe505000               ixgbe0_505           0.0.0.0/0                 failed
+ixgbe505000     ip       ixgbe505000               ixgbe0_505           0.0.0.0/0                 offline
 ixgbe505001     ip       ixgbe505001               ixgbe1_505           0.0.0.0/0                   up
-ixgbe505002     ip       ixgbe505002               ixgbe2_505           0.0.0.0/0                   up
+ixgbe505002     ip       ixgbe505002               ixgbe2_505           0.0.0.0/0                 offline
 ixgbe505003     ip       ixgbe505003               ixgbe3_505           0.0.0.0/0                   up
 #####################################################################################################################
 ## Pools information                                                                                               ##
