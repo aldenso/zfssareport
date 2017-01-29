@@ -27,16 +27,22 @@ func PrintPools(pools model.Pools, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("Pools information")
-	fmt.Printf("%-6s %-8s %-35s %10s %10s %10s %10s %10s %10s\n",
-		"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
-		"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Pools information")
+		fmt.Printf("%-6s %-8s %-35s %10s %10s %10s %10s %10s %10s\n",
+			"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
+			"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting pools info.")
+	}
 	for _, pool := range pools.List {
-		fmt.Printf("%-6s %-8s %-35s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n",
-			pool.Name, pool.Status, pool.Profile, pool.PoolUsage.Total/(1024*1024*1024), pool.PoolUsage.Available/(1024*1024*1024),
-			pool.PoolUsage.Free/(1024*1024*1024), pool.PoolUsage.UsageData/(1024*1024*1024), pool.PoolUsage.UsageSnapshots/(1024*1024*1024),
-			pool.PoolUsage.UsageTotal/(1024*1024*1024))
+		if !silent {
+			fmt.Printf("%-6s %-8s %-35s %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n",
+				pool.Name, pool.Status, pool.Profile, pool.PoolUsage.Total/(1024*1024*1024), pool.PoolUsage.Available/(1024*1024*1024),
+				pool.PoolUsage.Free/(1024*1024*1024), pool.PoolUsage.UsageData/(1024*1024*1024), pool.PoolUsage.UsageSnapshots/(1024*1024*1024),
+				pool.PoolUsage.UsageTotal/(1024*1024*1024))
+		}
 
 		line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;%.2f;%d;%.2f;%.2f;%d;%.2f;%.2f;%s;%s;%s", pool.Name, pool.Status, pool.Profile,
 			pool.PoolUsage.Available, pool.PoolUsage.UsageSnapshots, pool.PoolUsage.Used, pool.PoolUsage.Compression, pool.PoolUsage.UsageData,
@@ -91,15 +97,20 @@ func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-
-	utils.Header("Projects information")
-	fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Projects information")
+		fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting projects info.")
+	}
 	for _, projects := range pmap {
 		//projects := GetProjects(pool.Name)
 		for _, project := range projects.List {
-			fmt.Printf("%-15s %-10.2f %-10.2f %-8s %10.2f %40s\n", project.Name, project.Reservation/(1024*1024*1024),
-				project.Quota/(1024*1024*1024), project.Pool, project.SpaceTotal/(1024*1024*1024), project.MountPoint)
+			if !silent {
+				fmt.Printf("%-15s %-10.2f %-10.2f %-8s %10.2f %40s\n", project.Name, project.Reservation/(1024*1024*1024),
+					project.Quota/(1024*1024*1024), project.Pool, project.SpaceTotal/(1024*1024*1024), project.MountPoint)
+			}
 
 			line := fmt.Sprintf("%s;%s;%.2f;%.2f;%.2f;"+
 				/*line2*/ "%s;%s;%s;%t;%s;"+
@@ -215,16 +226,22 @@ func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("Filesystems information")
-	fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
-		"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Filesystems information")
+		fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
+			"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting filesystems info.")
+	}
 	for _, filesystems := range allfs {
 		for _, filesystem := range filesystems.List {
-			fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
-				filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
-				filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
-				filesystem.MountPoint)
+			if !silent {
+				fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
+					filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
+					filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
+					filesystem.MountPoint)
+			}
 
 			line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;"+
 				/*line2*/ "%.2f;%s;%s;%s;%s;"+
@@ -288,15 +305,21 @@ func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("LUNS information")
-	fmt.Printf("%-8s %-8s %-15s %9s %4s %-15s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "Num", "InitiatorGrp",
-		"GUID", "VolS(GB)", "Total(GB)")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("LUNS information")
+		fmt.Printf("%-8s %-8s %-15s %9s %4s %-15s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "Num", "InitiatorGrp",
+			"GUID", "VolS(GB)", "Total(GB)")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting luns info.")
+	}
 	for _, luns := range allLuns {
 		for _, lun := range luns.List {
-			fmt.Printf("%-8s %-8s %-15s %9s %4d %-15s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
-				lun.AssignedNumber, lun.InitiatorGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
-				lun.SpaceTotal/(1024*1024*1024))
+			if !silent {
+				fmt.Printf("%-8s %-8s %-15s %9s %4d %-15s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
+					lun.AssignedNumber, lun.InitiatorGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
+					lun.SpaceTotal/(1024*1024*1024))
+			}
 
 			line := fmt.Sprintf("%s;%s;%s;%s;%d;"+
 				/*line2*/ "%s;%s;%s;%.2f;%.2f;"+
@@ -344,11 +367,17 @@ func PrintNetInterfaces(netints *model.NetInterfaces, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("Network Interfaces information")
-	fmt.Printf("%-15s %-8s %-25s %-20s %-25s %5s\n", "interface", "class", "links", "label", "v4addrs", "state")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Network Interfaces information")
+		fmt.Printf("%-15s %-8s %-25s %-20s %-25s %5s\n", "interface", "class", "links", "label", "v4addrs", "state")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting network interfaces info.")
+	}
 	for _, interf := range netints.List {
-		interf.PrintNetInterfaceInfo()
+		if !silent {
+			interf.PrintNetInterfaceInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
 			/*line2*/ "%s;%t;%s;%s;%t;"+
@@ -380,11 +409,17 @@ func PrintFCInitiators(initiators *model.FCInitiators, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("FC Initiators information")
-	fmt.Printf("%-25s %-15s\n", "initiator", "alias")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("FC Initiators information")
+		fmt.Printf("%-25s %-15s\n", "initiator", "alias")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting FC initiators info.")
+	}
 	for _, initiator := range initiators.List {
-		initiator.PrintInitiatorInfo()
+		if !silent {
+			initiator.PrintInitiatorInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s", initiator.Alias, initiator.HREF, initiator.Initiator)
 
@@ -411,10 +446,16 @@ func PrintFCInitiatorGroups(groups *model.FCInitiatorGroups, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("FC Initiator Groups information")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("FC Initiator Groups information")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting FC initiator groups info.")
+	}
 	for _, group := range groups.List {
-		group.PrintInitiatorGroupInfo()
+		if !silent {
+			group.PrintInitiatorGroupInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s", group.HREF, group.Initiators, group.Name)
 
@@ -443,12 +484,18 @@ func PrintFCTargets(targets *model.FCTargets, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("FC Targets information")
-	fmt.Printf("%-25s %-18s %-10s %-8s %-8s %-8s %-8s %8s\n", "wwn", "port", "speed", "mode", "discPorts",
-		"LossSyn", "LossSignal", "LinkFail")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("FC Targets information")
+		fmt.Printf("%-25s %-18s %-10s %-8s %-8s %-8s %-8s %8s\n", "wwn", "port", "speed", "mode", "discPorts",
+			"LossSyn", "LossSignal", "LinkFail")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting FC targets info.")
+	}
 	for _, target := range targets.List {
-		target.PrintTargetInfo()
+		if !silent {
+			target.PrintTargetInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s;%s;%d;%s;%d;%d;%d;%d;%d;%d",
 			target.WWN, target.Speed, target.Port, target.Mode, target.DiscoveredPorts,
@@ -478,11 +525,17 @@ func PrintIscsiInitiators(initiators *model.IscsiInitiators, fs afero.Fs) {
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("Iscsi Initiators information")
-	fmt.Printf("%-55s %-15s %-11s %20s\n", "initiator", "alias", "chap user", "chap secret")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Iscsi Initiators information")
+		fmt.Printf("%-55s %-15s %-11s %20s\n", "initiator", "alias", "chap user", "chap secret")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting ISCSI initiators info.")
+	}
 	for _, initiator := range initiators.List {
-		initiator.PrintInitiatorInfo()
+		if !silent {
+			initiator.PrintInitiatorInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s;%s;%s", initiator.Alias, initiator.ChapSecret, initiator.ChapUser,
 			initiator.HREF, initiator.Initiator)
@@ -510,10 +563,16 @@ func PrintIscsiInitiatorGroups(groups *model.IscsiInitiatorGroups, fs afero.Fs) 
 	if err := writer.Write(fileheader); err != nil {
 		log.Fatal(err)
 	}
-	utils.Header("Iscsi Initiator Groups information")
-	fmt.Println("=====================================================================================================================")
+	if !silent {
+		utils.Header("Iscsi Initiator Groups information")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting ISCSI initiator groups info.")
+	}
 	for _, group := range groups.List {
-		group.PrintInitiatorGroupInfo()
+		if !silent {
+			group.PrintInitiatorGroupInfo()
+		}
 
 		line := fmt.Sprintf("%s;%s;%s", group.HREF, group.Initiators, group.Name)
 

@@ -132,7 +132,11 @@ func getZFSSAVersion() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	version.PrintVersionInfo()
+	if !silent {
+		version.PrintVersionInfo()
+	} else {
+		fmt.Println("getting version info.")
+	}
 	version.WriteCSV(Fs, dirname)
 }
 
@@ -295,6 +299,10 @@ func getClusterInfo() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cluster.PrintClusterInfo()
+	if !silent {
+		cluster.PrintClusterInfo()
+	} else {
+		fmt.Println("getting cluster info.")
+	}
 	cluster.WriteCSV(Fs, dirname)
 }

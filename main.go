@@ -28,14 +28,15 @@ var (
 	//NOW for timestamp
 	NOW = time.Now()
 
-	template   bool
-	configfile = "config.yml"
-	dirname    string
+	template, silent bool
+	configfile       = "config.yml"
+	dirname          string
 )
 
 func init() {
 	flag.BoolVar(&template, "template", false, "Create an example config.yml file.")
 	flag.StringVar(&configfile, "t", "config.yml", "Specify a config file.")
+	flag.BoolVar(&silent, "silent", false, "Do not print info, only create the csv outputs in zip file.")
 }
 
 func main() {
