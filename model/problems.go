@@ -34,6 +34,6 @@ func (problem *Problem) PrintProblemInfo() {
 		"Diagnosed: %s\nDescription: %s\n"+
 		"Impact: %s\nResponse: %s\n%s",
 		problem.Code, problem.Type, problem.Severity,
-		problem.Description, problem.Diagnosed,
+		problem.Diagnosed, problem.Description,
 		problem.Impact, problem.Response, line)
 }
