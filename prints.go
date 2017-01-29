@@ -586,3 +586,46 @@ func PrintIscsiInitiatorGroups(groups *model.IscsiInitiatorGroups, fs afero.Fs) 
 		log.Fatal(err)
 	}
 }
+
+//PrintChassis to print some chassis components info and create csv report.
+func PrintChassis(chassisslice *model.ChassisAll, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "chassis.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"faulted", "href", "locate", "manufacturer", "model", "name", "part",
+		"path", "revision", "rpm", "serial", "type"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Chassis information")
+		fmt.Printf("%-14s %-25s %-10s %-8s %-12s %s\n", "name", "model", "type", "faulted", "serial", "path")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting chassis info.")
+	}
+	for _, chassis := range chassisslice.List {
+		if !silent {
+			chassis.PrintChassisInfo()
+		}
+
+		line := fmt.Sprintf("%t;%s;%t;%s;%s;"+
+			"%s;%s;%d;%s;%d;"+
+			"%s;%s",
+			chassis.Faulted, chassis.HREF, chassis.Locate, chassis.Manufacturer, chassis.Model,
+			chassis.Name, chassis.Part, chassis.Path, chassis.Revision, chassis.RPM,
+			chassis.Serial, chassis.Type)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

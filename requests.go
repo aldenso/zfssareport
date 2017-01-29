@@ -306,3 +306,26 @@ func getClusterInfo() {
 	}
 	cluster.WriteCSV(Fs, dirname)
 }
+
+//GetChassis get chassis in zfssa.
+func GetChassis() *model.ChassisAll {
+	chassisslice := &model.ChassisAll{}
+	fullurl := fmt.Sprintf("%s/hardware/v1/chassis", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&chassisslice)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return chassisslice
+}

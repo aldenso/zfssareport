@@ -86,3 +86,31 @@ func (cluster *Cluster) WriteCSV(fs afero.Fs, dirname string) {
 		log.Fatal(err)
 	}
 }
+
+//ChassisAll struct for chassis components.
+type ChassisAll struct {
+	List []Chassis `json:"chassis"`
+}
+
+//Chassis struct for chassis component.
+type Chassis struct {
+	Faulted      bool   `json:"faulted"`
+	HREF         string `json:"href"`
+	Locate       bool   `json:"locate"`
+	Manufacturer string `json:"manufacturer"`
+	Model        string `json:"model"`
+	Name         string `json:"name"`
+	Part         string `json:"part,omitempty"`
+	Path         int    `json:"path,omitempty"`
+	Revision     string `json:"revision,omitempty"`
+	RPM          int    `json:"rpm,omitempty"`
+	Serial       string `json:"serial"`
+	Type         string `json:"type"`
+}
+
+//PrintChassisInfo to print chassis component info.
+func (chassis *Chassis) PrintChassisInfo() {
+	line := fmt.Sprintln("---------------------------------------------------------------------------------------------------------------------")
+	fmt.Printf("%-14s %-25s %-10s %-8t %-12s %d\n%s", chassis.Name, chassis.Model, chassis.Type, chassis.Faulted,
+		chassis.Serial, chassis.Path, line)
+}

@@ -57,6 +57,8 @@ func main() {
 	}
 	getZFSSAVersion()
 	getClusterInfo()
+	allchassis := GetChassis()
+	PrintChassis(allchassis, Fs)
 	interfaces := getNetInterfaces()
 	PrintNetInterfaces(interfaces, Fs)
 	pools := GetPools()
