@@ -329,3 +329,26 @@ func GetChassis() *model.ChassisAll {
 	}
 	return chassisslice
 }
+
+//GetProblems get problems in zfssa.
+func GetProblems() *model.Problems {
+	problems := &model.Problems{}
+	fullurl := fmt.Sprintf("%s/problem/v1/problems", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&problems)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return problems
+}

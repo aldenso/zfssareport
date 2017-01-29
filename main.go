@@ -59,6 +59,8 @@ func main() {
 	getClusterInfo()
 	allchassis := GetChassis()
 	PrintChassis(allchassis, Fs)
+	problems := GetProblems()
+	PrintProblems(problems, Fs)
 	interfaces := getNetInterfaces()
 	PrintNetInterfaces(interfaces, Fs)
 	pools := GetPools()

@@ -629,3 +629,45 @@ func PrintChassis(chassisslice *model.ChassisAll, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintProblems to print some problems info and create csv report.
+func PrintProblems(problems *model.Problems, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "problems.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"action", "code", "description", "diagnosed", "href", "impact", "phoned_home",
+		"response", "severity", "type", "url", "uuid"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Problems information")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting problems info.")
+	}
+	for _, problem := range problems.List {
+		if !silent {
+			problem.PrintProblemInfo()
+		}
+
+		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
+			"%s;%s;%s;%s;%s;"+
+			"%s;%s",
+			problem.Action, problem.Code, problem.Description, problem.Diagnosed, problem.HREF,
+			problem.Impact, problem.PhonedHome, problem.Response, problem.Severity, problem.Type,
+			problem.URL, problem.UUID)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
