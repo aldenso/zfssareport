@@ -375,3 +375,26 @@ func GetNetDevices() *model.NetDevices {
 	}
 	return devices
 }
+
+//GetNetDatalinks get network datalinks in zfssa.
+func GetNetDatalinks() *model.NetDatalinks {
+	datalinks := &model.NetDatalinks{}
+	fullurl := fmt.Sprintf("%s/network/v1/datalinks", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&datalinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return datalinks
+}

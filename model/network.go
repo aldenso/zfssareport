@@ -58,3 +58,28 @@ func (device *NetDevice) PrintNetDeviceInfo() {
 	fmt.Printf("%-8s %-8t %-8t %-15s %-15s %-18s %12s\n",
 		device.Device, device.Active, device.UP, device.Speed, device.Media, device.FactoryMAC, device.Duplex)
 }
+
+//NetDatalinks struct for network datalinks.
+type NetDatalinks struct {
+	List []NetDatalink `json:"datalinks"`
+}
+
+//NetDatalink struct for network datalink.
+type NetDatalink struct {
+	Class    string   `json:"class"`
+	Datalink string   `json:"datalink"`
+	Duplex   string   `json:"duplex"`
+	HREF     string   `json:"href"`
+	Label    string   `json:"label"`
+	Links    []string `json:"links"`
+	MAC      string   `json:"mac"`
+	MTU      int      `json:"mtu"`
+	Speed    string   `json:"speed"`
+}
+
+//PrintNetDatalinkInfo method to print some datalink info.
+func (datalink *NetDatalink) PrintNetDatalinkInfo() {
+	fmt.Printf("%-10s %-15s %-15s %-15s %-20s %-10d %s\n",
+		datalink.Class, datalink.Datalink, datalink.Label, strings.Join(datalink.Links, ","), datalink.MAC,
+		datalink.MTU, datalink.Speed)
+}

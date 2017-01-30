@@ -711,3 +711,43 @@ func PrintNetDevices(devices *model.NetDevices, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintNetDatalinks to print some network datalinks info and create csv report.
+func PrintNetDatalinks(datalinks *model.NetDatalinks, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "datalinks.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"class", "datalink", "duplex", "href", "label", "links", "mac", "mtu", "speed"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Network Datalinks information")
+		fmt.Printf("%-10s %-15s %-15s %-15s %-20s %-10s %s\n", "class", "datalink", "label", "links", "mac", "mtu", "speed")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting network datalinks info.")
+	}
+	for _, datalink := range datalinks.List {
+		if !silent {
+			datalink.PrintNetDatalinkInfo()
+		}
+
+		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
+			"%s;%s;%d;%s",
+			datalink.Class, datalink.Datalink, datalink.Duplex, datalink.HREF, datalink.Label,
+			datalink.Links, datalink.MAC, datalink.MTU, datalink.Speed)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

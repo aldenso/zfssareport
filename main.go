@@ -63,6 +63,8 @@ func main() {
 	PrintProblems(problems, Fs)
 	interfaces := getNetInterfaces()
 	PrintNetInterfaces(interfaces, Fs)
+	datalinks := GetNetDatalinks()
+	PrintNetDatalinks(datalinks, Fs)
 	devices := GetNetDevices()
 	PrintNetDevices(devices, Fs)
 	pools := GetPools()
