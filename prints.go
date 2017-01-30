@@ -671,3 +671,43 @@ func PrintProblems(problems *model.Problems, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintNetDevices to print some network devices info and create csv report.
+func PrintNetDevices(devices *model.NetDevices, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "devices.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"active", "device", "duplex", "factory_mac", "href", "media", "speed", "up"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Network Devices information")
+		fmt.Printf("%-8s %-8s %-8s %-15s %-15s %-18s %12s\n", "device", "active", "up", "speed", "media", "factory_mac", "duplex")
+		fmt.Println("=====================================================================================================================")
+	} else {
+		fmt.Println("getting network devices info.")
+	}
+	for _, device := range devices.List {
+		if !silent {
+			device.PrintNetDeviceInfo()
+		}
+
+		line := fmt.Sprintf("%t;%s;%s;%s;%s;"+
+			"%s;%s;%t",
+			device.Active, device.Device, device.Duplex, device.FactoryMAC, device.HREF,
+			device.Media, device.Speed, device.UP)
+
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

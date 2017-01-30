@@ -352,3 +352,26 @@ func GetProblems() *model.Problems {
 	}
 	return problems
 }
+
+//GetNetDevices get network devices in zfssa.
+func GetNetDevices() *model.NetDevices {
+	devices := &model.NetDevices{}
+	fullurl := fmt.Sprintf("%s/network/v1/devices", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&devices)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return devices
+}

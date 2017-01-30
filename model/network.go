@@ -35,3 +35,26 @@ func (interf *NetInterface) PrintNetInterfaceInfo() {
 		interf.Interface, interf.Class, strings.Join(interf.Links, ","), interf.Label,
 		strings.Join(interf.V4Addrs, ","), interf.State)
 }
+
+//NetDevices struct for network devices.
+type NetDevices struct {
+	List []NetDevice `json:"devices"`
+}
+
+//NetDevice struct for network device.
+type NetDevice struct {
+	Active     bool   `json:"active"`
+	Device     string `json:"device"`
+	Duplex     string `json:"duplex"`
+	FactoryMAC string `json:"factory_mac"`
+	HREF       string `json:"href"`
+	Media      string `json:"media"`
+	Speed      string `json:"Speed"`
+	UP         bool   `json:"up"`
+}
+
+//PrintNetDeviceInfo method to print some device info.
+func (device *NetDevice) PrintNetDeviceInfo() {
+	fmt.Printf("%-8s %-8t %-8t %-15s %-15s %-18s %12s\n",
+		device.Device, device.Active, device.UP, device.Speed, device.Media, device.FactoryMAC, device.Duplex)
+}

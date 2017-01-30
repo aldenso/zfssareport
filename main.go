@@ -63,6 +63,8 @@ func main() {
 	PrintProblems(problems, Fs)
 	interfaces := getNetInterfaces()
 	PrintNetInterfaces(interfaces, Fs)
+	devices := GetNetDevices()
+	PrintNetDevices(devices, Fs)
 	pools := GetPools()
 	PrintPools(pools, Fs)
 	pmap := CreateMapPoolsProjects(pools)
