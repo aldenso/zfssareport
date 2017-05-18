@@ -165,3 +165,12 @@ func ZipDir(fs afero.Fs, source string) error {
 	fs.RemoveAll(source)
 	return err
 }
+
+//Cleanup to remove temporary directory for results.
+func Cleanup(fs afero.Fs, source string) error {
+	err := fs.RemoveAll(source)
+	if err != nil {
+		return err
+	}
+	return nil
+}

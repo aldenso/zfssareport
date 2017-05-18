@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"time"
 
 	"github.com/aldenso/zfssareport/utils"
 	"github.com/aldenso/zfssareport/zfssareportfs"
+	"github.com/spf13/afero"
 )
 
 var (
@@ -39,6 +42,21 @@ func init() {
 	flag.BoolVar(&silent, "silent", false, "Do not print info, only create the csv outputs in zip file.")
 }
 
+func cleanexit(Fs afero.Fs, dirname string) {
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		err := utils.Cleanup(Fs, dirname)
+		if err != nil {
+			fmt.Printf("failed to remove directory %s: %v\n", dirname, err)
+		}
+		fmt.Println("Signal received")
+		fmt.Printf("removed directory %s\n", dirname)
+		os.Exit(1)
+	}()
+}
+
 func main() {
 	flag.Parse()
 	if template {
@@ -55,6 +73,7 @@ func main() {
 	if err := utils.CreateDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
+	cleanexit(Fs, dirname)
 	getZFSSAVersion()
 	getClusterInfo()
 	allchassis := GetChassis()
@@ -88,5 +107,6 @@ func main() {
 	if err := utils.ZipDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("############# DONE in %s #############\n", time.Since(NOW).String())
+	fmt.Printf("\n+++ results file '%s' created +++\n", dirname)
+	fmt.Printf("\n############# DONE in %s #############\n", time.Since(NOW).String())
 }
