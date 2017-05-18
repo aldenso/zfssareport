@@ -47,12 +47,13 @@ func cleanexit(Fs afero.Fs, dirname string) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
+		fmt.Println("Signal received")
 		err := utils.Cleanup(Fs, dirname)
 		if err != nil {
 			fmt.Printf("failed to remove directory %s: %v\n", dirname, err)
+		} else {
+			fmt.Printf("removed directory %s\n", dirname)
 		}
-		fmt.Println("Signal received")
-		fmt.Printf("removed directory %s\n", dirname)
 		os.Exit(1)
 	}()
 }
