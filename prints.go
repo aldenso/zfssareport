@@ -31,8 +31,6 @@ func PrintPools(pools model.Pools, fs afero.Fs) {
 			"Name", "Status", "Profile", "Total(GB)", "Avail(GB)",
 			"Free(GB)", "UData(GB)", "USnaps(GB)", "UTotal(GB)")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting pools info.")
 	}
 	for _, pool := range pools.List {
 		if !silent {
@@ -83,8 +81,6 @@ func PrintProjects(projects *model.Projects, fs afero.Fs) {
 		utils.Header("Projects information")
 		fmt.Printf("%-15s %-10s %-10s %-8s %10s %40s\n", "Project", "Reserv(GB)", "Quota(GB)", "Pool", "STotal(GB)", "mountpoint")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting projects info.")
 	}
 	for _, project := range projects.List {
 		//projects := GetProjects(pool.Name)
@@ -161,8 +157,6 @@ func PrintFilesystems(filesystems *model.Filesystems, fs afero.Fs) {
 		fmt.Printf("%-12s %-8s %-15s %9s %9s %9s %8s %8s %4s %15s\n",
 			"Filesystem", "Pool", "Project", "Reser(GB)", "Quota(GB)", "Total(GB)", "user", "group", "perms", "mountpoint")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting filesystems info.")
 	}
 	for _, filesystem := range filesystems.List {
 		if !silent {
@@ -238,8 +232,6 @@ func PrintLUNS(luns *model.LUNS, fs afero.Fs) {
 		fmt.Printf("%-8s %-8s %-15s %9s %4s %-15s %32s %8s %8s\n", "LUN", "Pool", "Project", "Status", "Num", "InitiatorGrp",
 			"GUID", "VolS(GB)", "Total(GB)")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting luns info.")
 	}
 	for _, lun := range luns.List {
 		if !silent {
@@ -297,14 +289,11 @@ func PrintNetInterfaces(netints *model.NetInterfaces, fs afero.Fs) {
 		utils.Header("Network Interfaces information")
 		fmt.Printf("%-15s %-8s %-25s %-20s %-25s %5s\n", "interface", "class", "links", "label", "v4addrs", "state")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting network interfaces info.")
 	}
 	for _, interf := range netints.List {
 		if !silent {
 			interf.PrintNetInterfaceInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
 			/*line2*/ "%s;%t;%s;%s;%t;"+
 			/*line3*/ "%s;%s;%t;%s;%t",
@@ -339,16 +328,12 @@ func PrintFCInitiators(initiators *model.FCInitiators, fs afero.Fs) {
 		utils.Header("FC Initiators information")
 		fmt.Printf("%-25s %-15s\n", "initiator", "alias")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting FC initiators info.")
 	}
 	for _, initiator := range initiators.List {
 		if !silent {
 			initiator.PrintInitiatorInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s", initiator.Alias, initiator.HREF, initiator.Initiator)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -375,16 +360,12 @@ func PrintFCInitiatorGroups(groups *model.FCInitiatorGroups, fs afero.Fs) {
 	if !silent {
 		utils.Header("FC Initiator Groups information")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting FC initiator groups info.")
 	}
 	for _, group := range groups.List {
 		if !silent {
 			group.PrintInitiatorGroupInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s", group.HREF, group.Initiators, group.Name)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -415,19 +396,15 @@ func PrintFCTargets(targets *model.FCTargets, fs afero.Fs) {
 		fmt.Printf("%-25s %-18s %-10s %-8s %-8s %-8s %-8s %8s\n", "wwn", "port", "speed", "mode", "discPorts",
 			"LossSyn", "LossSignal", "LinkFail")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting FC targets info.")
 	}
 	for _, target := range targets.List {
 		if !silent {
 			target.PrintTargetInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s;%s;%d;%s;%d;%d;%d;%d;%d;%d",
 			target.WWN, target.Speed, target.Port, target.Mode, target.DiscoveredPorts,
 			target.HREF, target.InvalidCRCCount, target.InvalidTXWordCount, target.LinkFailureCount,
 			target.LossOfSignalCount, target.LossOfSyncCount, target.ProtocolErrorCount)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -455,17 +432,13 @@ func PrintIscsiInitiators(initiators *model.IscsiInitiators, fs afero.Fs) {
 		utils.Header("Iscsi Initiators information")
 		fmt.Printf("%-55s %-15s %-11s %20s\n", "initiator", "alias", "chap user", "chap secret")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting ISCSI initiators info.")
 	}
 	for _, initiator := range initiators.List {
 		if !silent {
 			initiator.PrintInitiatorInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s;%s;%s", initiator.Alias, initiator.ChapSecret, initiator.ChapUser,
 			initiator.HREF, initiator.Initiator)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -492,16 +465,12 @@ func PrintIscsiInitiatorGroups(groups *model.IscsiInitiatorGroups, fs afero.Fs) 
 	if !silent {
 		utils.Header("Iscsi Initiator Groups information")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting ISCSI initiator groups info.")
 	}
 	for _, group := range groups.List {
 		if !silent {
 			group.PrintInitiatorGroupInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s", group.HREF, group.Initiators, group.Name)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -530,21 +499,17 @@ func PrintChassis(chassisslice *model.ChassisAll, fs afero.Fs) {
 		utils.Header("Chassis information")
 		fmt.Printf("%-14s %-25s %-10s %-8s %-12s %s\n", "name", "model", "type", "faulted", "serial", "path")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting chassis info.")
 	}
 	for _, chassis := range chassisslice.List {
 		if !silent {
 			chassis.PrintChassisInfo()
 		}
-
 		line := fmt.Sprintf("%t;%s;%t;%s;%s;"+
 			"%s;%s;%d;%s;%d;"+
 			"%s;%s",
 			chassis.Faulted, chassis.HREF, chassis.Locate, chassis.Manufacturer, chassis.Model,
 			chassis.Name, chassis.Part, chassis.Path, chassis.Revision, chassis.RPM,
 			chassis.Serial, chassis.Type)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -572,21 +537,17 @@ func PrintProblems(problems *model.Problems, fs afero.Fs) {
 	if !silent {
 		utils.Header("Problems information")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting problems info.")
 	}
 	for _, problem := range problems.List {
 		if !silent {
 			problem.PrintProblemInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
 			"%s;%s;%s;%s;%s;"+
 			"%s;%s",
 			problem.Action, problem.Code, problem.Description, problem.Diagnosed, problem.HREF,
 			problem.Impact, problem.PhonedHome, problem.Response, problem.Severity, problem.Type,
 			problem.URL, problem.UUID)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -614,19 +575,15 @@ func PrintNetDevices(devices *model.NetDevices, fs afero.Fs) {
 		utils.Header("Network Devices information")
 		fmt.Printf("%-8s %-8s %-8s %-15s %-15s %-18s %12s\n", "device", "active", "up", "speed", "media", "factory_mac", "duplex")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting network devices info.")
 	}
 	for _, device := range devices.List {
 		if !silent {
 			device.PrintNetDeviceInfo()
 		}
-
 		line := fmt.Sprintf("%t;%s;%s;%s;%s;"+
 			"%s;%s;%t",
 			device.Active, device.Device, device.Duplex, device.FactoryMAC, device.HREF,
 			device.Media, device.Speed, device.UP)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
@@ -654,19 +611,15 @@ func PrintNetDatalinks(datalinks *model.NetDatalinks, fs afero.Fs) {
 		utils.Header("Network Datalinks information")
 		fmt.Printf("%-10s %-15s %-15s %-15s %-20s %-10s %s\n", "class", "datalink", "label", "links", "mac", "mtu", "speed")
 		fmt.Println("=====================================================================================================================")
-	} else {
-		fmt.Println("getting network datalinks info.")
 	}
 	for _, datalink := range datalinks.List {
 		if !silent {
 			datalink.PrintNetDatalinkInfo()
 		}
-
 		line := fmt.Sprintf("%s;%s;%s;%s;%s;"+
 			"%s;%s;%d;%s",
 			datalink.Class, datalink.Datalink, datalink.Duplex, datalink.HREF, datalink.Label,
 			datalink.Links, datalink.MAC, datalink.MTU, datalink.Speed)
-
 		record := strings.Split(line, ";")
 		if err := writer.Write(record); err != nil {
 			log.Fatal(err)
