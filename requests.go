@@ -16,7 +16,8 @@ var (
 	HTTPClientCfg = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	client = &http.Client{Transport: HTTPClientCfg, Timeout: 60 * time.Second}
+	//Timeout is high because some ZFSSA storage are complex and takes to much time to retrieve some info.
+	client = &http.Client{Transport: HTTPClientCfg, Timeout: 100 * time.Second}
 )
 
 //GetPools get all pools.
@@ -42,9 +43,9 @@ func GetPools() model.Pools {
 }
 
 //GetProjects get all projects in a pool.
-func GetProjects(pool string) model.Projects {
-	var projects model.Projects
-	fullurl := fmt.Sprintf("%s/%s/%s/%s", URL, "storage/v1/pools", pool, "projects")
+func GetProjects() *model.Projects {
+	projects := &model.Projects{}
+	fullurl := fmt.Sprintf("%s/storage/v1/projects", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -65,9 +66,9 @@ func GetProjects(pool string) model.Projects {
 }
 
 //GetFilesystems get all Filesystems in a project.
-func GetFilesystems(pool string, project string) *model.Filesystems {
+func GetFilesystems() *model.Filesystems {
 	filesystems := &model.Filesystems{}
-	fullurl := fmt.Sprintf("%s/storage/v1/pools/%s/projects/%s/filesystems", URL, pool, project)
+	fullurl := fmt.Sprintf("%s/storage/v1/filesystems", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -88,9 +89,9 @@ func GetFilesystems(pool string, project string) *model.Filesystems {
 }
 
 //GetLUNS get all LUNS in a project.
-func GetLUNS(pool string, project string) *model.LUNS {
+func GetLUNS() *model.LUNS {
 	luns := &model.LUNS{}
-	fullurl := fmt.Sprintf("%s/storage/v1/pools/%s/projects/%s/luns", URL, pool, project)
+	fullurl := fmt.Sprintf("%s/storage/v1/luns", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
 		fmt.Println(err)

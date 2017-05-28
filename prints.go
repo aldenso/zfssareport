@@ -6,8 +6,6 @@ import (
 	"log"
 	"strings"
 
-	"sync"
-
 	"github.com/aldenso/zfssareport/model"
 	"github.com/aldenso/zfssareport/utils"
 	"github.com/spf13/afero"
@@ -58,24 +56,8 @@ func PrintPools(pools model.Pools, fs afero.Fs) {
 	}
 }
 
-//CreateMapPoolsProjects create a map for projects in pools.
-func CreateMapPoolsProjects(pools model.Pools) map[string]model.Projects {
-	poolsprojects := make(map[string]model.Projects)
-	var wg sync.WaitGroup
-	for _, pool := range pools.List {
-		wg.Add(1)
-		go func(pool model.Pool) {
-			defer wg.Done()
-			projects := GetProjects(pool.Name)
-			poolsprojects[pool.Name] = projects
-		}(pool)
-	}
-	wg.Wait()
-	return poolsprojects
-}
-
 //PrintProjects prints some projects values for all pools.
-func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
+func PrintProjects(projects *model.Projects, fs afero.Fs) {
 	file, err := utils.CreateFile(fs, dirname, "projects.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -104,50 +86,47 @@ func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
 	} else {
 		fmt.Println("getting projects info.")
 	}
-	for _, projects := range pmap {
+	for _, project := range projects.List {
 		//projects := GetProjects(pool.Name)
-		for _, project := range projects.List {
-			if !silent {
-				fmt.Printf("%-15s %-10.2f %-10.2f %-8s %10.2f %40s\n", project.Name, project.Reservation/(1024*1024*1024),
-					project.Quota/(1024*1024*1024), project.Pool, project.SpaceTotal/(1024*1024*1024), project.MountPoint)
-			}
-
-			line := fmt.Sprintf("%s;%s;%.2f;%.2f;%.2f;"+
-				/*line2*/ "%s;%s;%s;%t;%s;"+
-				/*line3*/ "%s;%s;%.2f;%d;%s;"+
-				/*line4*/ "%t;%s;%s;%t;%s;"+
-				/*line5*/ "%.2f;%.2f;%.2f;%.2f;%s;"+
-				/*line6*/ "%t;%s;%s;%s;%s;"+
-				/*line7*/ "%s;%d;%t;%t;%t;"+
-				/*line8*/ "%f;%t;%s;%s;%s;"+
-				/*line9*/ "%s;%s;%s;%s;%s;"+
-				/*line10*/ "%s;%s;%s;%s;%s;"+
-				/*line11*/ "%s;%s;%s;%s;%s;"+
-				/*line12*/ "%s;%s;%s;%s;%s;"+
-				/*line13*/ "%s;%s;%s;%s;%s;"+
-				/*line14*/ "%s;%s;%s;%s;%s;"+
-				/*line15*/ "%s;%s;%s;%.2f;%.2f;"+
-				/*line16*/ "%.2f;%.2f;%.2f;%t",
-				project.Name, project.Pool, project.Reservation, project.Quota, project.SpaceTotal,
-				/*line2*/ project.MountPoint, project.ACLinherit, project.ACLMode, project.ATime, project.CanonicalName,
-				/*line3*/ project.CheckSum, project.Compression, project.CompressRatio, project.Copies, project.Creation,
-				/*line4*/ project.Dedup, project.DefaultGroup, project.DefaultPermissions, project.DefaultSparse, project.DefaultUser,
-				/*line5*/ project.DefaulVolBlockSize, project.DefaultVolSize, project.DefaultGroupQuota, project.DefaultUserQuota, project.Encryption,
-				/*line6*/ project.Exported, project.HREF, project.ID, project.KeyChangeDate, project.KeyStatus,
-				/*line7*/ project.Logbias, project.MaxBlockSize, project.Nbmand, project.Nodestroy, project.ReadOnly,
-				/*line8*/ project.RecordSize, project.Rstchown, project.SecondaryCache, project.ShareDAV, project.ShareFTP,
-				/*line9*/ project.ShareNFS, project.ShareSFTP, project.ShareSMB, project.ShareTFTP, project.SnapDir,
-				/*line10*/ project.SnapLabel, project.ProjectSource.ACLinherit, project.ProjectSource.ACLMode, project.ProjectSource.ATime, project.ProjectSource.CheckSum,
-				/*line11*/ project.ProjectSource.Compression, project.ProjectSource.Copies, project.ProjectSource.Dedup, project.ProjectSource.Exported, project.ProjectSource.KeyChangeDate,
-				/*line12*/ project.ProjectSource.Logbias, project.ProjectSource.MaxBlockSize, project.ProjectSource.MountPoint, project.ProjectSource.Nbmand, project.ProjectSource.ReadOnly,
-				/*line13*/ project.ProjectSource.RecordSize, project.ProjectSource.Reservation, project.ProjectSource.RRSRCActions, project.ProjectSource.Rstchown, project.ProjectSource.SecondaryCache,
-				/*line14*/ project.ProjectSource.ShareDAV, project.ProjectSource.ShareFTP, project.ProjectSource.ShareNFS, project.ProjectSource.ShareSFTP, project.ProjectSource.ShareSMB,
-				/*line15*/ project.ProjectSource.ShareTFTP, project.ProjectSource.SnapDir, project.ProjectSource.VScan, project.SpaceAvailable, project.SpaceData,
-				/*line16*/ project.SpaceSnapShots, project.SpaceUnusedRes, project.SpaceUnusedResShares, project.VScan)
-			record := strings.Split(line, ";")
-			if err := writer.Write(record); err != nil {
-				log.Fatal(err)
-			}
+		if !silent {
+			fmt.Printf("%-15s %-10.2f %-10.2f %-8s %10.2f %40s\n", project.Name, project.Reservation/(1024*1024*1024),
+				project.Quota/(1024*1024*1024), project.Pool, project.SpaceTotal/(1024*1024*1024), project.MountPoint)
+		}
+		line := fmt.Sprintf("%s;%s;%.2f;%.2f;%.2f;"+
+			/*line2*/ "%s;%s;%s;%t;%s;"+
+			/*line3*/ "%s;%s;%.2f;%d;%s;"+
+			/*line4*/ "%t;%s;%s;%t;%s;"+
+			/*line5*/ "%.2f;%.2f;%.2f;%.2f;%s;"+
+			/*line6*/ "%t;%s;%s;%s;%s;"+
+			/*line7*/ "%s;%d;%t;%t;%t;"+
+			/*line8*/ "%f;%t;%s;%s;%s;"+
+			/*line9*/ "%s;%s;%s;%s;%s;"+
+			/*line10*/ "%s;%s;%s;%s;%s;"+
+			/*line11*/ "%s;%s;%s;%s;%s;"+
+			/*line12*/ "%s;%s;%s;%s;%s;"+
+			/*line13*/ "%s;%s;%s;%s;%s;"+
+			/*line14*/ "%s;%s;%s;%s;%s;"+
+			/*line15*/ "%s;%s;%s;%.2f;%.2f;"+
+			/*line16*/ "%.2f;%.2f;%.2f;%t",
+			project.Name, project.Pool, project.Reservation, project.Quota, project.SpaceTotal,
+			/*line2*/ project.MountPoint, project.ACLinherit, project.ACLMode, project.ATime, project.CanonicalName,
+			/*line3*/ project.CheckSum, project.Compression, project.CompressRatio, project.Copies, project.Creation,
+			/*line4*/ project.Dedup, project.DefaultGroup, project.DefaultPermissions, project.DefaultSparse, project.DefaultUser,
+			/*line5*/ project.DefaulVolBlockSize, project.DefaultVolSize, project.DefaultGroupQuota, project.DefaultUserQuota, project.Encryption,
+			/*line6*/ project.Exported, project.HREF, project.ID, project.KeyChangeDate, project.KeyStatus,
+			/*line7*/ project.Logbias, project.MaxBlockSize, project.Nbmand, project.Nodestroy, project.ReadOnly,
+			/*line8*/ project.RecordSize, project.Rstchown, project.SecondaryCache, project.ShareDAV, project.ShareFTP,
+			/*line9*/ project.ShareNFS, project.ShareSFTP, project.ShareSMB, project.ShareTFTP, project.SnapDir,
+			/*line10*/ project.SnapLabel, project.ProjectSource.ACLinherit, project.ProjectSource.ACLMode, project.ProjectSource.ATime, project.ProjectSource.CheckSum,
+			/*line11*/ project.ProjectSource.Compression, project.ProjectSource.Copies, project.ProjectSource.Dedup, project.ProjectSource.Exported, project.ProjectSource.KeyChangeDate,
+			/*line12*/ project.ProjectSource.Logbias, project.ProjectSource.MaxBlockSize, project.ProjectSource.MountPoint, project.ProjectSource.Nbmand, project.ProjectSource.ReadOnly,
+			/*line13*/ project.ProjectSource.RecordSize, project.ProjectSource.Reservation, project.ProjectSource.RRSRCActions, project.ProjectSource.Rstchown, project.ProjectSource.SecondaryCache,
+			/*line14*/ project.ProjectSource.ShareDAV, project.ProjectSource.ShareFTP, project.ProjectSource.ShareNFS, project.ProjectSource.ShareSFTP, project.ProjectSource.ShareSMB,
+			/*line15*/ project.ProjectSource.ShareTFTP, project.ProjectSource.SnapDir, project.ProjectSource.VScan, project.SpaceAvailable, project.SpaceData,
+			/*line16*/ project.SpaceSnapShots, project.SpaceUnusedRes, project.SpaceUnusedResShares, project.VScan)
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
 		}
 	}
 	writer.Flush()
@@ -156,57 +135,8 @@ func PrintProjects(pmap map[string]model.Projects, fs afero.Fs) {
 	}
 }
 
-//CreateFSSlice create a map for filesystems
-func CreateFSSlice(pmap map[string]model.Projects) []model.Filesystems {
-	var poolsprojectsfs struct {
-		List []model.Filesystems
-		mu   sync.Mutex
-	}
-	var wg sync.WaitGroup
-	for pool := range pmap {
-		for _, project := range pmap[pool].List {
-			wg.Add(1)
-			go func(pool string, project model.Project) {
-				defer wg.Done()
-				//fmt.Println("get fs proj:", project.Name, "pool", pool)
-				filesystems := GetFilesystems(pool, project.Name)
-				poolsprojectsfs.mu.Lock()
-				poolsprojectsfs.List = append(poolsprojectsfs.List, *filesystems)
-				poolsprojectsfs.mu.Unlock()
-			}(pool, project)
-		}
-		wg.Wait()
-	}
-
-	return poolsprojectsfs.List
-}
-
-//CreateLUNSSlice create a map for filesystems
-func CreateLUNSSlice(pmap map[string]model.Projects) []model.LUNS {
-	var poolsprojectsluns struct {
-		List []model.LUNS
-		mu   sync.Mutex
-	}
-	var wg sync.WaitGroup
-	for pool := range pmap {
-		for _, project := range pmap[pool].List {
-			wg.Add(1)
-			go func(pool string, project model.Project) {
-				defer wg.Done()
-				//fmt.Println("get lun proj:", project.Name, "pool", pool)
-				luns := GetLUNS(pool, project.Name)
-				poolsprojectsluns.mu.Lock()
-				poolsprojectsluns.List = append(poolsprojectsluns.List, *luns)
-				poolsprojectsluns.mu.Unlock()
-			}(pool, project)
-		}
-		wg.Wait()
-	}
-	return poolsprojectsluns.List
-}
-
 //PrintFilesystems prints some filesystems values for all projects in all pools.
-func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
+func PrintFilesystems(filesystems *model.Filesystems, fs afero.Fs) {
 	file, err := utils.CreateFile(fs, dirname, "filesystems.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -234,51 +164,49 @@ func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 	} else {
 		fmt.Println("getting filesystems info.")
 	}
-	for _, filesystems := range allfs {
-		for _, filesystem := range filesystems.List {
-			if !silent {
-				fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
-					filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
-					filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
-					filesystem.MountPoint)
-			}
+	for _, filesystem := range filesystems.List {
+		if !silent {
+			fmt.Printf("%-12s %-8s %-15s %9.2f %9.2f %9.2f %8s %8s %4s %15s\n", filesystem.Name, filesystem.Pool,
+				filesystem.Project, filesystem.Reservation/(1024*1024*1024), filesystem.Quota/(1024*1024*1024),
+				filesystem.SpaceTotal/(1024*1024*1024), filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions,
+				filesystem.MountPoint)
+		}
 
-			line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;"+
-				/*line2*/ "%.2f;%s;%s;%s;%s;"+
-				/*line3*/ "%.2f;%.2f;%.2f;%.2f;%s;"+
-				/*line4*/ "%s;%t;%s;%s;%s;"+
-				/*line5*/ "%s;%.2f;%d;%s;%t;"+
-				/*line6*/ "%s;%t;%s;%s;%s;"+
-				/*line7*/ "%s;%s;%d;%t;%t;"+
-				/*line8*/ "%s;%t;%t;%.2f;%t;"+
-				/*line9*/ "%t;%s;%s;%s;%s;"+
-				/*line10*/ "%s;%s;%s;%s;%s;"+
-				/*line11*/ "%s;%t;%t;%s;%s;"+
-				/*line12*/ "%s;%s;%s;%s;%s;"+
-				/*line13*/ "%s;%s;%s;%s;%s;"+
-				/*line14*/ "%s;%s;%s;%s;%s;"+
-				/*line15*/ "%s;%s;%s;%s;%s;"+
-				/*line16*/ "%s;%s;%s;%s;%s",
-				filesystem.Name, filesystem.Pool, filesystem.Project, filesystem.Reservation, filesystem.Quota,
-				/*line2*/ filesystem.SpaceTotal, filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions, filesystem.MountPoint,
-				/*line3*/ filesystem.SpaceAvailable, filesystem.SpaceData, filesystem.SpaceSnapShots, filesystem.SpaceUnusedRes, filesystem.ACLinherit,
-				/*line4*/ filesystem.ACLMode, filesystem.ATime, filesystem.CanonicalName, filesystem.CaseSensitivity, filesystem.CheckSum,
-				/*line5*/ filesystem.Compression, filesystem.CompressRatio, filesystem.Copies, filesystem.Creation, filesystem.Dedup,
-				/*line6*/ filesystem.Encryption, filesystem.Exported, filesystem.HREF, filesystem.ID, filesystem.KeyChangeDate,
-				/*line7*/ filesystem.KeyStatus, filesystem.Logbias, filesystem.MaxBlockSize, filesystem.Nbmand, filesystem.Nodestroy,
-				/*line8*/ filesystem.Normalization, filesystem.QuotaSnap, filesystem.ReadOnly, filesystem.RecordSize, filesystem.ReservationSnap,
-				/*line9*/ filesystem.Rstchown, filesystem.SecondaryCache, filesystem.Shadow, filesystem.ShareDAV, filesystem.ShareFTP,
-				/*line10*/ filesystem.ShareNFS, filesystem.ShareSFTP, filesystem.ShareSMB, filesystem.ShareTFTP, filesystem.SnapDir,
-				/*line11*/ filesystem.SnapLabel, filesystem.UTF8Only, filesystem.VScan, filesystem.FSSource.ACLinherit, filesystem.FSSource.ACLMode,
-				/*line12*/ filesystem.FSSource.ATime, filesystem.FSSource.CheckSum, filesystem.FSSource.Compression, filesystem.FSSource.Copies, filesystem.FSSource.Dedup,
-				/*line13*/ filesystem.FSSource.Exported, filesystem.FSSource.KeyChangeDate, filesystem.FSSource.Logbias, filesystem.FSSource.MaxBlockSize, filesystem.FSSource.MountPoint,
-				/*line14*/ filesystem.FSSource.Nbmand, filesystem.FSSource.ReadOnly, filesystem.FSSource.RecordSize, filesystem.FSSource.Reservation, filesystem.FSSource.RRSRCActions,
-				/*line15*/ filesystem.FSSource.Rstchown, filesystem.FSSource.SecondaryCache, filesystem.FSSource.ShareDAV, filesystem.FSSource.ShareFTP, filesystem.FSSource.ShareNFS,
-				/*line16*/ filesystem.FSSource.ShareSFTP, filesystem.FSSource.ShareSMB, filesystem.FSSource.ShareTFTP, filesystem.FSSource.SnapDir, filesystem.FSSource.VScan)
-			record := strings.Split(line, ";")
-			if err := writer.Write(record); err != nil {
-				log.Fatal(err)
-			}
+		line := fmt.Sprintf("%s;%s;%s;%.2f;%.2f;"+
+			/*line2*/ "%.2f;%s;%s;%s;%s;"+
+			/*line3*/ "%.2f;%.2f;%.2f;%.2f;%s;"+
+			/*line4*/ "%s;%t;%s;%s;%s;"+
+			/*line5*/ "%s;%.2f;%d;%s;%t;"+
+			/*line6*/ "%s;%t;%s;%s;%s;"+
+			/*line7*/ "%s;%s;%d;%t;%t;"+
+			/*line8*/ "%s;%t;%t;%.2f;%t;"+
+			/*line9*/ "%t;%s;%s;%s;%s;"+
+			/*line10*/ "%s;%s;%s;%s;%s;"+
+			/*line11*/ "%s;%t;%t;%s;%s;"+
+			/*line12*/ "%s;%s;%s;%s;%s;"+
+			/*line13*/ "%s;%s;%s;%s;%s;"+
+			/*line14*/ "%s;%s;%s;%s;%s;"+
+			/*line15*/ "%s;%s;%s;%s;%s;"+
+			/*line16*/ "%s;%s;%s;%s;%s",
+			filesystem.Name, filesystem.Pool, filesystem.Project, filesystem.Reservation, filesystem.Quota,
+			/*line2*/ filesystem.SpaceTotal, filesystem.RootUser, filesystem.RootGroup, filesystem.RootPermissions, filesystem.MountPoint,
+			/*line3*/ filesystem.SpaceAvailable, filesystem.SpaceData, filesystem.SpaceSnapShots, filesystem.SpaceUnusedRes, filesystem.ACLinherit,
+			/*line4*/ filesystem.ACLMode, filesystem.ATime, filesystem.CanonicalName, filesystem.CaseSensitivity, filesystem.CheckSum,
+			/*line5*/ filesystem.Compression, filesystem.CompressRatio, filesystem.Copies, filesystem.Creation, filesystem.Dedup,
+			/*line6*/ filesystem.Encryption, filesystem.Exported, filesystem.HREF, filesystem.ID, filesystem.KeyChangeDate,
+			/*line7*/ filesystem.KeyStatus, filesystem.Logbias, filesystem.MaxBlockSize, filesystem.Nbmand, filesystem.Nodestroy,
+			/*line8*/ filesystem.Normalization, filesystem.QuotaSnap, filesystem.ReadOnly, filesystem.RecordSize, filesystem.ReservationSnap,
+			/*line9*/ filesystem.Rstchown, filesystem.SecondaryCache, filesystem.Shadow, filesystem.ShareDAV, filesystem.ShareFTP,
+			/*line10*/ filesystem.ShareNFS, filesystem.ShareSFTP, filesystem.ShareSMB, filesystem.ShareTFTP, filesystem.SnapDir,
+			/*line11*/ filesystem.SnapLabel, filesystem.UTF8Only, filesystem.VScan, filesystem.FSSource.ACLinherit, filesystem.FSSource.ACLMode,
+			/*line12*/ filesystem.FSSource.ATime, filesystem.FSSource.CheckSum, filesystem.FSSource.Compression, filesystem.FSSource.Copies, filesystem.FSSource.Dedup,
+			/*line13*/ filesystem.FSSource.Exported, filesystem.FSSource.KeyChangeDate, filesystem.FSSource.Logbias, filesystem.FSSource.MaxBlockSize, filesystem.FSSource.MountPoint,
+			/*line14*/ filesystem.FSSource.Nbmand, filesystem.FSSource.ReadOnly, filesystem.FSSource.RecordSize, filesystem.FSSource.Reservation, filesystem.FSSource.RRSRCActions,
+			/*line15*/ filesystem.FSSource.Rstchown, filesystem.FSSource.SecondaryCache, filesystem.FSSource.ShareDAV, filesystem.FSSource.ShareFTP, filesystem.FSSource.ShareNFS,
+			/*line16*/ filesystem.FSSource.ShareSFTP, filesystem.FSSource.ShareSMB, filesystem.FSSource.ShareTFTP, filesystem.FSSource.SnapDir, filesystem.FSSource.VScan)
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
 		}
 	}
 	writer.Flush()
@@ -288,7 +216,7 @@ func PrintFilesystems(allfs []model.Filesystems, fs afero.Fs) {
 }
 
 //PrintLUNS prints some luns values for all projects in all pools.
-func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
+func PrintLUNS(luns *model.LUNS, fs afero.Fs) {
 	file, err := utils.CreateFile(fs, dirname, "luns.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -313,39 +241,37 @@ func PrintLUNS(allLuns []model.LUNS, fs afero.Fs) {
 	} else {
 		fmt.Println("getting luns info.")
 	}
-	for _, luns := range allLuns {
-		for _, lun := range luns.List {
-			if !silent {
-				fmt.Printf("%-8s %-8s %-15s %9s %4d %-15s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
-					lun.AssignedNumber, lun.InitiatorGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
-					lun.SpaceTotal/(1024*1024*1024))
-			}
+	for _, lun := range luns.List {
+		if !silent {
+			fmt.Printf("%-8s %-8s %-15s %9s %4d %-15s %32s %8.2f %8.2f\n", lun.Name, lun.Pool, lun.Project, lun.Status,
+				lun.AssignedNumber, lun.InitiatorGroup, lun.LunGUID, lun.VolSize/(1024*1204*1024),
+				lun.SpaceTotal/(1024*1024*1024))
+		}
 
-			line := fmt.Sprintf("%s;%s;%s;%s;%d;"+
-				/*line2*/ "%s;%s;%s;%.2f;%.2f;"+
-				/*line3*/ "%.2f;%.2f;%.2f;%s;%s;"+
-				/*line4*/ "%s;%.2f;%d;%s;%t;"+
-				/*line5*/ "%s;%t;%t;%s;%s;"+
-				/*line6*/ "%s;%s;%s;%s;%d;"+
-				/*line7*/ "%t;%s;%s;%t;%d;"+
-				/*line8*/ "%t;%s;%s;%s;%s;"+
-				/*line9*/ "%s;%s;%s;%s;%s;"+
-				/*line10*/ "%s;%s",
-				lun.Name, lun.Pool, lun.Project, lun.Status, lun.AssignedNumber,
-				/*line2*/ lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize, lun.SpaceAvailable,
-				/*line3*/ lun.SpaceData, lun.SpaceSnapShots, lun.SpaceTotal, lun.CanonicalName, lun.Checksum,
-				/*line4*/ lun.Compression, lun.CompressRatio, lun.Copies, lun.Creation, lun.Dedup,
-				/*line5*/ lun.Encryption, lun.Exported, lun.FixedNumber, lun.HREF, lun.ID,
-				/*line6*/ lun.KeyChangeDate, lun.KeyStatus, lun.Logbias, lun.LUNumber, lun.MaxBlockSize,
-				/*line7*/ lun.Nodestroy, lun.SecondaryCache, lun.SnapLabel, lun.Sparse, lun.VolBlockSize,
-				/*line8*/ lun.WriteCache, lun.LunSource.CheckSum, lun.LunSource.Compression, lun.LunSource.Copies, lun.LunSource.Dedup,
-				/*line9*/ lun.LunSource.Encryption, lun.LunSource.Exported, lun.LunSource.KeyChangeDate, lun.LunSource.Logbias, lun.LunSource.MaxBlockSize,
-				/*line10*/ lun.LunSource.RRSRCActions, lun.LunSource.SecondaryCache)
+		line := fmt.Sprintf("%s;%s;%s;%s;%d;"+
+			/*line2*/ "%s;%s;%s;%.2f;%.2f;"+
+			/*line3*/ "%.2f;%.2f;%.2f;%s;%s;"+
+			/*line4*/ "%s;%.2f;%d;%s;%t;"+
+			/*line5*/ "%s;%t;%t;%s;%s;"+
+			/*line6*/ "%s;%s;%s;%s;%d;"+
+			/*line7*/ "%t;%s;%s;%t;%d;"+
+			/*line8*/ "%t;%s;%s;%s;%s;"+
+			/*line9*/ "%s;%s;%s;%s;%s;"+
+			/*line10*/ "%s;%s",
+			lun.Name, lun.Pool, lun.Project, lun.Status, lun.AssignedNumber,
+			/*line2*/ lun.InitiatorGroup, lun.TargetGroup, lun.LunGUID, lun.VolSize, lun.SpaceAvailable,
+			/*line3*/ lun.SpaceData, lun.SpaceSnapShots, lun.SpaceTotal, lun.CanonicalName, lun.Checksum,
+			/*line4*/ lun.Compression, lun.CompressRatio, lun.Copies, lun.Creation, lun.Dedup,
+			/*line5*/ lun.Encryption, lun.Exported, lun.FixedNumber, lun.HREF, lun.ID,
+			/*line6*/ lun.KeyChangeDate, lun.KeyStatus, lun.Logbias, lun.LUNumber, lun.MaxBlockSize,
+			/*line7*/ lun.Nodestroy, lun.SecondaryCache, lun.SnapLabel, lun.Sparse, lun.VolBlockSize,
+			/*line8*/ lun.WriteCache, lun.LunSource.CheckSum, lun.LunSource.Compression, lun.LunSource.Copies, lun.LunSource.Dedup,
+			/*line9*/ lun.LunSource.Encryption, lun.LunSource.Exported, lun.LunSource.KeyChangeDate, lun.LunSource.Logbias, lun.LunSource.MaxBlockSize,
+			/*line10*/ lun.LunSource.RRSRCActions, lun.LunSource.SecondaryCache)
 
-			record := strings.Split(line, ";")
-			if err := writer.Write(record); err != nil {
-				log.Fatal(err)
-			}
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
 		}
 	}
 	writer.Flush()
