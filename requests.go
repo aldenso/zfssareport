@@ -16,7 +16,7 @@ var (
 	HTTPClientCfg = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	//Timeout is high because some ZFSSA storage are complex and takes to much time to retrieve some info.
+	//Timeout is high because some ZFSSA storage are complex and takes too much time to retrieve some info.
 	client = &http.Client{Transport: HTTPClientCfg, Timeout: 100 * time.Second}
 )
 

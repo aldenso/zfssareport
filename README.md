@@ -110,3 +110,29 @@ The csv reports are placed in a zip file, named after de ip/hostname and the tim
 ```
 
 Issue: When dealing with more than one initiator group for a lun, the zfs api changes AssignedNumber from int to []int, thus we get json: cannot unmarshal.
+
+You can use silent mode (-silent) to suppress the items output and just know the steps running.
+
+```text
+./zfssareport -t config.yml -silent
+getting version info.
+getting cluster info.
+getting chassis info.
+getting problems info.
+getting network interfaces info.
+getting network datalinks info.
+getting network devices info.
+getting pools info.
+getting projects info.
+getting filesystems info.
+getting luns info.
+getting FC initiators info.
+getting FC initiators groups info.
+getting FC targets info.
+getting ISCSI initiators info.
+getting ISCSI initiators groups info.
+
++++ results file '10.246.2.83_2017-05-29T080858-0400' created +++
+
+############# DONE in 1m47.0031203s #############
+```
