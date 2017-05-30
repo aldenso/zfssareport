@@ -124,7 +124,7 @@ func GetLUNS(chluns chan *model.LUNS) {
 }
 
 //GetZFSSAVersion get zfs version info.
-func GetZFSSAVersion() {
+func GetZFSSAVersion(chversion chan *model.Version) {
 	if silent {
 		fmt.Println("getting version info.")
 	}
@@ -149,7 +149,7 @@ func GetZFSSAVersion() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	version.WriteCSV(Fs, dirname)
+	chversion <- version
 }
 
 //GetNetInterfaces get network interfaces info.
@@ -309,7 +309,10 @@ func GetIscsiInitiatorGroups(chiscsiIGs chan *model.IscsiInitiatorGroups) {
 }
 
 //GetClusterInfo gets zfs cluster info.
-func GetClusterInfo() {
+func GetClusterInfo(chcluster chan *model.Cluster) {
+	if silent {
+		fmt.Println("getting cluster info.")
+	}
 	cluster := &model.Cluster{}
 	fullurl := fmt.Sprintf("%s/hardware/v1/cluster", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
@@ -331,12 +334,7 @@ func GetClusterInfo() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if !silent {
-		cluster.PrintClusterInfo()
-	} else {
-		fmt.Println("getting cluster info.")
-	}
-	cluster.WriteCSV(Fs, dirname)
+	chcluster <- cluster
 }
 
 //GetChassis get chassis in zfssa.

@@ -76,14 +76,20 @@ func main() {
 		log.Fatal(err)
 	}
 	cleanexit(Fs, dirname)
-	GetZFSSAVersion()
-	GetClusterInfo()
+	chversion := make(chan *model.Version)
+	chcluster := make(chan *model.Cluster)
 	chchassis := make(chan *model.ChassisAll)
 	chproblems := make(chan *model.Problems)
+	go GetZFSSAVersion(chversion)
+	go GetClusterInfo(chcluster)
 	go GetChassis(chchassis)
 	go GetProblems(chproblems)
+	version := <-chversion
+	cluster := <-chcluster
 	chassis := <-chchassis
 	problems := <-chproblems
+	PrintZFSSAVersion(version, Fs)
+	PrintZFSSACluster(cluster, Fs)
 	PrintChassis(chassis, Fs)
 	PrintProblems(problems, Fs)
 	chnetinterfaces := make(chan *model.NetInterfaces)

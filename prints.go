@@ -630,3 +630,19 @@ func PrintNetDatalinks(datalinks *model.NetDatalinks, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintZFSSAVersion to print zfs version info and create csv report
+func PrintZFSSAVersion(version *model.Version, fs afero.Fs) {
+	version.WriteCSV(fs, dirname)
+	if !silent {
+		version.PrintVersionInfo()
+	}
+}
+
+//PrintZFSSACluster to print zfs cluster info and create csv report
+func PrintZFSSACluster(cluster *model.Cluster, fs afero.Fs) {
+	cluster.WriteCSV(fs, dirname)
+	if !silent {
+		cluster.PrintClusterInfo()
+	}
+}
