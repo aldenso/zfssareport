@@ -12,7 +12,7 @@ import (
 )
 
 //PrintPools prints some pools values and create file to dump all values.
-func PrintPools(pools model.Pools, fs afero.Fs) {
+func PrintPools(pools *model.Pools, fs afero.Fs) {
 	//POOLS = GetPools()
 	file, err := utils.CreateFile(fs, dirname, "pools.csv")
 	if err != nil {

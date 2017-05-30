@@ -11,6 +11,7 @@ import (
 
 	"time"
 
+	"github.com/aldenso/zfssareport/model"
 	"github.com/aldenso/zfssareport/utils"
 	"github.com/aldenso/zfssareport/zfssareportfs"
 	"github.com/spf13/afero"
@@ -75,36 +76,64 @@ func main() {
 		log.Fatal(err)
 	}
 	cleanexit(Fs, dirname)
-	getZFSSAVersion()
-	getClusterInfo()
-	allchassis := GetChassis()
-	PrintChassis(allchassis, Fs)
-	problems := GetProblems()
+	GetZFSSAVersion()
+	GetClusterInfo()
+	chchassis := make(chan *model.ChassisAll)
+	chproblems := make(chan *model.Problems)
+	go GetChassis(chchassis)
+	go GetProblems(chproblems)
+	chassis := <-chchassis
+	problems := <-chproblems
+	PrintChassis(chassis, Fs)
 	PrintProblems(problems, Fs)
-	interfaces := getNetInterfaces()
+	chnetinterfaces := make(chan *model.NetInterfaces)
+	chnetdatalinks := make(chan *model.NetDatalinks)
+	chnetdevices := make(chan *model.NetDevices)
+	go GetNetInterfaces(chnetinterfaces)
+	go GetNetDatalinks(chnetdatalinks)
+	go GetNetDevices(chnetdevices)
+	interfaces := <-chnetinterfaces
+	datalinks := <-chnetdatalinks
+	devices := <-chnetdevices
 	PrintNetInterfaces(interfaces, Fs)
-	datalinks := GetNetDatalinks()
 	PrintNetDatalinks(datalinks, Fs)
-	devices := GetNetDevices()
 	PrintNetDevices(devices, Fs)
-	pools := GetPools()
+	chpools := make(chan *model.Pools)
+	chprojects := make(chan *model.Projects)
+	chfilesystems := make(chan *model.Filesystems)
+	chluns := make(chan *model.LUNS)
+	go GetPools(chpools)
+	go GetProjects(chprojects)
+	go GetFilesystems(chfilesystems)
+	go GetLUNS(chluns)
+	pools := <-chpools
+	projects := <-chprojects
+	filesystems := <-chfilesystems
+	luns := <-chluns
 	PrintPools(pools, Fs)
-	projects := GetProjects()
 	PrintProjects(projects, Fs)
-	filesystems := GetFilesystems()
 	PrintFilesystems(filesystems, Fs)
-	luns := GetLUNS()
 	PrintLUNS(luns, Fs)
-	fcinitiators := GetFCInitiators()
+	chfcinitiators := make(chan *model.FCInitiators)
+	chfcinitiatorsgroups := make(chan *model.FCInitiatorGroups)
+	chfctargets := make(chan *model.FCTargets)
+	go GetFCInitiators(chfcinitiators)
+	go GetFCInitiatorGroups(chfcinitiatorsgroups)
+	go GetFCTargets(chfctargets)
+	fcinitiators := <-chfcinitiators
+	fcinitiatorsgroups := <-chfcinitiatorsgroups
+	fctargets := <-chfctargets
 	PrintFCInitiators(fcinitiators, Fs)
-	fcinitiatorgroups := GetFCInitiatorGroups()
-	PrintFCInitiatorGroups(fcinitiatorgroups, Fs)
-	fctargets := GetFCTargets()
+	PrintFCInitiatorGroups(fcinitiatorsgroups, Fs)
 	PrintFCTargets(fctargets, Fs)
-	iscsiinitiators := GetIscsiInitiators()
-	PrintIscsiInitiators(iscsiinitiators, Fs)
-	iscsiinitiatorgroups := GetIscsiInitiatorGroups()
-	PrintIscsiInitiatorGroups(iscsiinitiatorgroups, Fs)
+	chiscsiIs := make(chan *model.IscsiInitiators)
+	chiscsiIGs := make(chan *model.IscsiInitiatorGroups)
+	go GetIscsiInitiators(chiscsiIs)
+	go GetIscsiInitiatorGroups(chiscsiIGs)
+	iscsiIs := <-chiscsiIs
+	iscsiIGs := <-chiscsiIGs
+	PrintIscsiInitiators(iscsiIs, Fs)
+	PrintIscsiInitiatorGroups(iscsiIGs, Fs)
 	if err := utils.ZipDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}

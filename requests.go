@@ -17,15 +17,15 @@ var (
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	//Timeout is high because some ZFSSA storage are complex and takes too much time to retrieve some info.
-	client = &http.Client{Transport: HTTPClientCfg, Timeout: 100 * time.Second}
+	client = &http.Client{Transport: HTTPClientCfg, Timeout: 120 * time.Second}
 )
 
 //GetPools get all pools.
-func GetPools() model.Pools {
+func GetPools(chpools chan *model.Pools) {
 	if silent {
 		fmt.Println("getting pools info.")
 	}
-	var pools model.Pools
+	pools := &model.Pools{}
 	req, err := http.NewRequest("GET", URL+"/storage/v1/pools", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -42,11 +42,11 @@ func GetPools() model.Pools {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return pools
+	chpools <- pools
 }
 
 //GetProjects get all projects in a pool.
-func GetProjects() *model.Projects {
+func GetProjects(chprojects chan *model.Projects) {
 	if silent {
 		fmt.Println("getting projects info.")
 	}
@@ -68,11 +68,11 @@ func GetProjects() *model.Projects {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return projects
+	chprojects <- projects
 }
 
 //GetFilesystems get all Filesystems in a project.
-func GetFilesystems() *model.Filesystems {
+func GetFilesystems(chfilesystems chan *model.Filesystems) {
 	if silent {
 		fmt.Println("getting filesystems info.")
 	}
@@ -94,11 +94,11 @@ func GetFilesystems() *model.Filesystems {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return filesystems
+	chfilesystems <- filesystems
 }
 
 //GetLUNS get all LUNS in a project.
-func GetLUNS() *model.LUNS {
+func GetLUNS(chluns chan *model.LUNS) {
 	if silent {
 		fmt.Println("getting luns info.")
 	}
@@ -120,10 +120,11 @@ func GetLUNS() *model.LUNS {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return luns
+	chluns <- luns
 }
 
-func getZFSSAVersion() {
+//GetZFSSAVersion get zfs version info.
+func GetZFSSAVersion() {
 	if silent {
 		fmt.Println("getting version info.")
 	}
@@ -151,7 +152,8 @@ func getZFSSAVersion() {
 	version.WriteCSV(Fs, dirname)
 }
 
-func getNetInterfaces() *model.NetInterfaces {
+//GetNetInterfaces get network interfaces info.
+func GetNetInterfaces(chnetinterfaces chan *model.NetInterfaces) {
 	if silent {
 		fmt.Println("getting network interfaces info.")
 	}
@@ -173,11 +175,11 @@ func getNetInterfaces() *model.NetInterfaces {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return interfaces
+	chnetinterfaces <- interfaces
 }
 
 //GetFCInitiators get all initiators in zfssa.
-func GetFCInitiators() *model.FCInitiators {
+func GetFCInitiators(chfcinitiators chan *model.FCInitiators) {
 	if silent {
 		fmt.Println("getting FC initiators info.")
 	}
@@ -199,11 +201,11 @@ func GetFCInitiators() *model.FCInitiators {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return initiators
+	chfcinitiators <- initiators
 }
 
 //GetFCInitiatorGroups get all initiators in zfssa.
-func GetFCInitiatorGroups() *model.FCInitiatorGroups {
+func GetFCInitiatorGroups(chfcinitiatorsgroups chan *model.FCInitiatorGroups) {
 	if silent {
 		fmt.Println("getting FC initiators groups info.")
 	}
@@ -225,11 +227,11 @@ func GetFCInitiatorGroups() *model.FCInitiatorGroups {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return groups
+	chfcinitiatorsgroups <- groups
 }
 
 //GetFCTargets get all targets in zfssa.
-func GetFCTargets() *model.FCTargets {
+func GetFCTargets(chfctargets chan *model.FCTargets) {
 	if silent {
 		fmt.Println("getting FC targets info.")
 	}
@@ -251,11 +253,11 @@ func GetFCTargets() *model.FCTargets {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return targets
+	chfctargets <- targets
 }
 
 //GetIscsiInitiators get all iscsi initiators in zfssa.
-func GetIscsiInitiators() *model.IscsiInitiators {
+func GetIscsiInitiators(chiscsiIs chan *model.IscsiInitiators) {
 	if silent {
 		fmt.Println("getting ISCSI initiators info.")
 	}
@@ -277,11 +279,11 @@ func GetIscsiInitiators() *model.IscsiInitiators {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return initiators
+	chiscsiIs <- initiators
 }
 
 //GetIscsiInitiatorGroups get all iscsi initiators in zfssa.
-func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
+func GetIscsiInitiatorGroups(chiscsiIGs chan *model.IscsiInitiatorGroups) {
 	if silent {
 		fmt.Println("getting ISCSI initiators groups info.")
 	}
@@ -303,10 +305,11 @@ func GetIscsiInitiatorGroups() *model.IscsiInitiatorGroups {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return groups
+	chiscsiIGs <- groups
 }
 
-func getClusterInfo() {
+//GetClusterInfo gets zfs cluster info.
+func GetClusterInfo() {
 	cluster := &model.Cluster{}
 	fullurl := fmt.Sprintf("%s/hardware/v1/cluster", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
@@ -337,11 +340,11 @@ func getClusterInfo() {
 }
 
 //GetChassis get chassis in zfssa.
-func GetChassis() *model.ChassisAll {
+func GetChassis(chchassis chan *model.ChassisAll) {
 	if silent {
 		fmt.Println("getting chassis info.")
 	}
-	chassisslice := &model.ChassisAll{}
+	chassis := &model.ChassisAll{}
 	fullurl := fmt.Sprintf("%s/hardware/v1/chassis", URL)
 	req, err := http.NewRequest("GET", fullurl, nil)
 	if err != nil {
@@ -355,15 +358,15 @@ func GetChassis() *model.ChassisAll {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(&chassisslice)
+	err = json.NewDecoder(resp.Body).Decode(&chassis)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return chassisslice
+	chchassis <- chassis
 }
 
 //GetProblems get problems in zfssa.
-func GetProblems() *model.Problems {
+func GetProblems(chproblems chan *model.Problems) {
 	if silent {
 		fmt.Println("getting problems info.")
 	}
@@ -385,11 +388,11 @@ func GetProblems() *model.Problems {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return problems
+	chproblems <- problems
 }
 
 //GetNetDevices get network devices in zfssa.
-func GetNetDevices() *model.NetDevices {
+func GetNetDevices(chnetdevices chan *model.NetDevices) {
 	if silent {
 		fmt.Println("getting network devices info.")
 	}
@@ -411,11 +414,11 @@ func GetNetDevices() *model.NetDevices {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return devices
+	chnetdevices <- devices
 }
 
 //GetNetDatalinks get network datalinks in zfssa.
-func GetNetDatalinks() *model.NetDatalinks {
+func GetNetDatalinks(chnetdatalinks chan *model.NetDatalinks) {
 	if silent {
 		fmt.Println("getting network datalinks info.")
 	}
@@ -437,5 +440,5 @@ func GetNetDatalinks() *model.NetDatalinks {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return datalinks
+	chnetdatalinks <- datalinks
 }
