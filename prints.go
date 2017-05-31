@@ -716,3 +716,36 @@ func PrintRoutes(routes *model.Routes, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintServices to print some general services info and create csv report.
+func PrintServices(services *model.Services, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "services.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"status", "href", "name", "log href", "log size"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("General Service information")
+		fmt.Printf("%-15s %-10s %-60s %-8s\n", "name", "status", "log href", "log size")
+		fmt.Println("=====================================================================================================================")
+	}
+	for _, service := range services.List {
+		if !silent {
+			service.PrintServiceInfo()
+		}
+		line := fmt.Sprintf("%s;%s;%s;%s;%d", service.Status, service.HREF, service.Name, service.Log.HREF, service.Log.Size)
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

@@ -142,12 +142,16 @@ func main() {
 	PrintFCTargets(fctargets, Fs)
 	chiscsiIs := make(chan *model.IscsiInitiators)
 	chiscsiIGs := make(chan *model.IscsiInitiatorGroups)
+	chservices := make(chan *model.Services)
 	go GetIscsiInitiators(chiscsiIs)
 	go GetIscsiInitiatorGroups(chiscsiIGs)
+	go GetServices(chservices)
 	iscsiIs := <-chiscsiIs
 	iscsiIGs := <-chiscsiIGs
+	services := <-chservices
 	PrintIscsiInitiators(iscsiIs, Fs)
 	PrintIscsiInitiatorGroups(iscsiIGs, Fs)
+	PrintServices(services, Fs)
 	if err := utils.ZipDir(Fs, dirname); err != nil {
 		log.Fatal(err)
 	}

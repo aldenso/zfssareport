@@ -492,3 +492,29 @@ func GetRoutes(chroutes chan *model.Routes) {
 	}
 	chroutes <- routes
 }
+
+//GetServices get general services info in zfs.
+func GetServices(chservices chan *model.Services) {
+	if silent {
+		fmt.Println("getting general services info.")
+	}
+	services := &model.Services{}
+	fullurl := fmt.Sprintf("%s/service/v1/services", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&services)
+	if err != nil {
+		log.Fatal(err)
+	}
+	chservices <- services
+}
