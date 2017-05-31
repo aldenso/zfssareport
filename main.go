@@ -80,18 +80,22 @@ func main() {
 	chcluster := make(chan *model.Cluster)
 	chchassis := make(chan *model.ChassisAll)
 	chproblems := make(chan *model.Problems)
+	chusers := make(chan *model.Users)
 	go GetZFSSAVersion(chversion)
 	go GetClusterInfo(chcluster)
 	go GetChassis(chchassis)
 	go GetProblems(chproblems)
+	go GetUsers(chusers)
 	version := <-chversion
 	cluster := <-chcluster
 	chassis := <-chchassis
 	problems := <-chproblems
+	users := <-chusers
 	PrintZFSSAVersion(version, Fs)
 	PrintZFSSACluster(cluster, Fs)
 	PrintChassis(chassis, Fs)
 	PrintProblems(problems, Fs)
+	PrintUsers(users, Fs)
 	chnetinterfaces := make(chan *model.NetInterfaces)
 	chnetdatalinks := make(chan *model.NetDatalinks)
 	chnetdevices := make(chan *model.NetDevices)

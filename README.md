@@ -132,7 +132,7 @@ getting FC targets info.
 getting ISCSI initiators info.
 getting ISCSI initiators groups info.
 
-+++ results file '10.246.2.83_2017-05-29T080858-0400' created +++
++++ results file '192.168.56.150_2017-05-29T080858-0400' created +++
 
 ############# DONE in 1m47.0031203s #############
 ```

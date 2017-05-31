@@ -646,3 +646,38 @@ func PrintZFSSACluster(cluster *model.Cluster, fs afero.Fs) {
 		cluster.PrintClusterInfo()
 	}
 }
+
+//PrintUsers to print some users info and create csv report.
+func PrintUsers(users *model.Users, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "users.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"logname", "type", "uid", "fullname", "initial_password", "require_annotation", "roles",
+		"kiosk_mode", "kiosk_screen", "href"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Users information")
+		fmt.Printf("%-15s %-10s %-11s %-35s %-8s\n", "logname", "type", "uid", "roles", "annotation")
+		fmt.Println("=====================================================================================================================")
+	}
+	for _, user := range users.List {
+		if !silent {
+			user.PrintUserInfo()
+		}
+		line := fmt.Sprintf("%s;%s;%d;%s;%s;%v;%s;%v;%s;%s", user.Logname, user.Type, user.UID, user.FullName, user.InitialPassword, user.RequireAnnotation,
+			user.Roles, user.KioskMode, user.KioskScreen, user.HREF)
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}

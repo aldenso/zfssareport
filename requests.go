@@ -440,3 +440,29 @@ func GetNetDatalinks(chnetdatalinks chan *model.NetDatalinks) {
 	}
 	chnetdatalinks <- datalinks
 }
+
+//GetUsers get all users in zfs.
+func GetUsers(chusers chan *model.Users) {
+	if silent {
+		fmt.Println("getting users info.")
+	}
+	users := &model.Users{}
+	fullurl := fmt.Sprintf("%s/user/v1/users", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&users)
+	if err != nil {
+		log.Fatal(err)
+	}
+	chusers <- users
+}
