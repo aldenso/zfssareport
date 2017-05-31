@@ -466,3 +466,29 @@ func GetUsers(chusers chan *model.Users) {
 	}
 	chusers <- users
 }
+
+//GetRoutes get all routes in zfs.
+func GetRoutes(chroutes chan *model.Routes) {
+	if silent {
+		fmt.Println("getting routes info.")
+	}
+	routes := &model.Routes{}
+	fullurl := fmt.Sprintf("%s/network/v1/routes", URL)
+	req, err := http.NewRequest("GET", fullurl, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("X-Auth-User", USER)
+	req.Header.Add("X-Auth-Key", PASSWORD)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&routes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	chroutes <- routes
+}

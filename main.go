@@ -99,15 +99,19 @@ func main() {
 	chnetinterfaces := make(chan *model.NetInterfaces)
 	chnetdatalinks := make(chan *model.NetDatalinks)
 	chnetdevices := make(chan *model.NetDevices)
+	chroutes := make(chan *model.Routes)
 	go GetNetInterfaces(chnetinterfaces)
 	go GetNetDatalinks(chnetdatalinks)
 	go GetNetDevices(chnetdevices)
+	go GetRoutes(chroutes)
 	interfaces := <-chnetinterfaces
 	datalinks := <-chnetdatalinks
 	devices := <-chnetdevices
+	routes := <-chroutes
 	PrintNetInterfaces(interfaces, Fs)
 	PrintNetDatalinks(datalinks, Fs)
 	PrintNetDevices(devices, Fs)
+	PrintRoutes(routes, Fs)
 	chpools := make(chan *model.Pools)
 	chprojects := make(chan *model.Projects)
 	chfilesystems := make(chan *model.Filesystems)

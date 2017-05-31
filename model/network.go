@@ -83,3 +83,26 @@ func (datalink *NetDatalink) PrintNetDatalinkInfo() {
 		datalink.Class, datalink.Datalink, datalink.Label, strings.Join(datalink.Links, ","), datalink.MAC,
 		datalink.MTU, datalink.Speed)
 }
+
+//Routes struct for network routes.
+type Routes struct {
+	List []Route `json:"routes"`
+}
+
+//Route struct for network route.
+type Route struct {
+	Status      string `json:"status"`
+	Family      string `json:"family"`
+	Destination string `json:"destination"`
+	Mask        int    `json:"mask"`
+	HREF        string `json:"href"`
+	Interface   string `json:"interface"`
+	Type        string `json:"type"`
+	Gateway     string `json:"gateway"`
+}
+
+//PrintRouteInfo method to print some datalink info.
+func (route *Route) PrintRouteInfo() {
+	fmt.Printf("%-18s %-18s %-10s %-8s %-6d %-10s %s\n",
+		route.Destination, route.Gateway, route.Interface, route.Status, route.Mask, route.Type, route.Family)
+}

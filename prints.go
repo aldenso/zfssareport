@@ -681,3 +681,38 @@ func PrintUsers(users *model.Users, fs afero.Fs) {
 		log.Fatal(err)
 	}
 }
+
+//PrintRoutes to print some routes info and create csv report.
+func PrintRoutes(routes *model.Routes, fs afero.Fs) {
+	file, err := utils.CreateFile(fs, dirname, "routes.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer := csv.NewWriter(file)
+	//writer.Comma = ';'
+	fileheader := []string{"status", "family", "destination", "mask", "href", "interface", "type", "gateway"}
+	if err := writer.Write(fileheader); err != nil {
+		log.Fatal(err)
+	}
+	if !silent {
+		utils.Header("Routes information")
+		fmt.Printf("%-18s %-18s %-10s %-8s %-6s %-10s %s\n", "destination", "gateway", "interface", "status", "mask",
+			"type", "family")
+		fmt.Println("=====================================================================================================================")
+	}
+	for _, route := range routes.List {
+		if !silent {
+			route.PrintRouteInfo()
+		}
+		line := fmt.Sprintf("%s;%s;%s;%d;%s;%s;%s;%s", route.Status, route.Family, route.Destination, route.Mask, route.HREF, route.Interface,
+			route.Type, route.Gateway)
+		record := strings.Split(line, ";")
+		if err := writer.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
+	}
+}
